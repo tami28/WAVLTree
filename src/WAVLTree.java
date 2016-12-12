@@ -1,3 +1,6 @@
+import WAVLTree.AbsWAVLNode;
+import WAVLTree.WAVLNode;
+
 /**
  *
  * WAVLTree
@@ -27,11 +30,26 @@ public class WAVLTree {
    * returns the info of an item with key k if it exists in the tree
    * otherwise, returns null
    */
-  public String search(int k)
-  {
-	return "42";  // to be replaced by student code
-  }
-
+	public String search(int k)
+	  {
+		return searchBranch(k, root);  // to be replaced by student code
+	  }
+	  
+	public String searchBranch(int k, WAVLNode current){ 
+		//While there's still how to go down the tree (and key not found) - search through the correct path.
+		if (current.key == k) {
+			return current.value;
+		  
+		} else if((current.key > k) && (current.getRightSon() instanceof AbsWAVLNode)) {
+			return searchBranch(k, (WAVLNode) current.getRightSon());
+			   
+		} else if((current.key < k) && (current.getLeftSon() instanceof AbsWAVLNode)) {
+			return searchBranch(k, (WAVLNode) current.getRightSon());
+			  
+		} else 
+			return null;
+			  
+	  }
   /**
    * public int insert(int k, String i)
    *
