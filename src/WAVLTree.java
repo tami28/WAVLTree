@@ -97,18 +97,61 @@ public class WAVLTree {
 	   }
 	   //TODO: after rotation need to update, from which node up?
 	   //if we fix the problem by rotating, didn't finish promoting all nodes:
-	   else{
-		   if (node.getParent() != null){
-			   node.setRank(node.getRank() + 1);
-			   count = count + promote(node.getParent(), count);   
-		   }
+	   if (node.getParent() != null){
+		   node.setRank(node.getRank() + 1);
+		   count = count + promote(node.getParent(), count);   
 	   }
 	   
 	   return count;
    }
    
-   private int rebalancing(WAVLNode root, int count){
+   private int rebalanceLeftSide(WAVLNode source){
+	   int count = 1;
+	   //This casting should be ok because we are in the case where the left side has a high rank:
+	   WAVLNode child = (WAVLNode) source.getLeftSon();
+	   //If we are in the left-right case we would like to move it to a left-left situation::
+	   if (child.getLeftSon().getRank() < child.getRightSon().getRank()){
+		   count ++;
+		   WAVLNode grandchild = (WAVLNode) child.getRightSon();
+		   AbsWAVLNode temp = grandchild.getLeftSon();
+		   //move the grandchild under root:
+		   source.setLeftSon(grandchild);
+		   grandchild.setParent(source);
+		   
+		   //move the child under the grandchild:
+		   grandchild.setLeftSon(child);
+		   child.setParent(grandchild);
+		   //Restore lost leaves:
+		   child.setRightSon(temp);
+		   temp.setParent(child);
+	   }
+	   //from now handle left-left situation:
 	   
+	   //if this is not the root  of the tree:
+	   if (source.getParent() != null){
+		   WAVLNode grandfather = (WAVLNode)source.getParent();
+		   child = (WAVLNode)source.getLeftSon();
+		   grandfather.setLeftSon(child);
+		   child.setParent(grandfather);
+		   
+		   AbsWAVLNode temp= child.getRightSon();
+		   child.setRightSon(source);
+		   source.setParent(child);
+		   
+		   source.setLeftSon(temp);
+		   temp.setParent(source);
+	   }
+	   //this is the root, need a different approach:
+	   else{
+		   //source is root, we are not losing information:
+		   this.root = (WAVLNode) source.getLeftSon();
+		   this.root.setParent(null);
+		   AbsWAVLNode temp = root.getRightSon();
+		   root.setRightSon(source);
+		   source.setParent(root);
+		   source.setLeftSon(temp);
+		   temp.setParent(source);
+	   }
 	   return count;
    }
 
@@ -310,16 +353,16 @@ public class WAVLTree {
 		return leftSon;
 	}
 
-	public void setLeftSon(WAVLNode leftSon) {
-		this.leftSon = leftSon;
+	public void setLeftSon(AbsWAVLNode temp) {
+		this.leftSon = temp;
 	}
 
 	public AbsWAVLNode getRightSon() {
 		return rightSon;
 	}
 
-	public void setRightSon(WAVLNode rightSon) {
-		this.rightSon = rightSon;
+	public void setRightSon(AbsWAVLNode temp) {
+		this.rightSon = temp;
 	}
 
 
