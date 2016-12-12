@@ -287,7 +287,7 @@ public class WAVLTree {
     */
    public int size()
    {
-	   return 42; // to be replaced by student code
+	   return root.getSize();
    }
 
   /**
