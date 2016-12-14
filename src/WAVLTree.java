@@ -180,7 +180,42 @@ public class WAVLTree {
    */
    public int delete(int k)
    {
-	   return 42;	// to be replaced by student code
+	   return recursiveDelete(root, k);
+   }
+   
+   public int recursiveDelete(WAVLNode root, int k) {
+	   
+	   if (root.key == k){
+		   if (root.getLeftSon() == null && root.getRightSon() == null) { 
+			   return 0;
+			   
+		   } else if ((root.getLeftSon() instanceof WAVLExternalNode) && root.getRightSon() == null) {
+			   //TODO: balance right
+			   return 0;
+			   
+		   } else if ((root.getLeftSon() == null) && (root.getRightSon() instanceof WAVLExternalNode)) {
+			   //TODO: balance left
+			   return 0;
+			   
+		   } else {
+			   //TODO: balance tree without this node
+			   return 0;
+			   
+		   }
+			   
+	   } else if (root.key > k) {
+		   if (root.getRightSon() instanceof WAVLNode) {
+			   return recursiveDelete((WAVLNode) root.getRightSon(), k);
+		   } else {
+			   return -1;
+		   }
+	   } else {
+		   if (root.getLeftSon() instanceof WAVLNode) {
+			   return recursiveDelete((WAVLNode) root.getLeftSon(), k);
+		   } else {
+			   return -1;
+		   }
+	   }
    }
 
    /**
