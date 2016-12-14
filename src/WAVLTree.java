@@ -13,6 +13,10 @@ import java.util.Queue;
 public class WAVLTree {
 
 	private WAVLNode root = null;
+	private WAVLNode min_node = null;
+	private WAVLNode max_node = null;
+
+	//TODO - update pointer to min max
 	
 	/**
    	* public boolean empty()
@@ -254,7 +258,42 @@ public class WAVLTree {
    */
    public int delete(int k)
    {
-	   return 42;	// to be replaced by student code
+	   return recursiveDelete(root, k);
+   }
+   
+   public int recursiveDelete(WAVLNode root, int k) {
+	   
+	   if (root.key == k){
+		   if (root.getLeftSon() == null && root.getRightSon() == null) { 
+			   return 0;
+			   
+		   } else if ((root.getLeftSon() instanceof WAVLExternalNode) && root.getRightSon() == null) {
+			   //TODO: balance right
+			   return 0;
+			   
+		   } else if ((root.getLeftSon() == null) && (root.getRightSon() instanceof WAVLExternalNode)) {
+			   //TODO: balance left
+			   return 0;
+			   
+		   } else {
+			   //TODO: balance tree without this node
+			   return 0;
+			   
+		   }
+			   
+	   } else if (root.key > k) {
+		   if (root.getRightSon() instanceof WAVLNode) {
+			   return recursiveDelete((WAVLNode) root.getRightSon(), k);
+		   } else {
+			   return -1;
+		   }
+	   } else {
+		   if (root.getLeftSon() instanceof WAVLNode) {
+			   return recursiveDelete((WAVLNode) root.getLeftSon(), k);
+		   } else {
+			   return -1;
+		   }
+	   }
    }
 
    /**
@@ -269,7 +308,11 @@ public class WAVLTree {
 	   if (empty()){
 		   return null;
 	   }
-	   
+	   return min_node.value;
+   }
+
+// Old format of min - without the pointer to min_node
+/*
 	   WAVLNode current = root;
 	   //While we can go left - there is a smaller key.. we will return the value of the leftmost node
 	   while (!(current.getLeftSon() instanceof WAVLExternalNode)){
@@ -277,7 +320,7 @@ public class WAVLTree {
 	   }
 	   return current.getValue(); // to be replaced by student code
    }
-
+*/
    /**
     * public String max()
     *
@@ -289,13 +332,17 @@ public class WAVLTree {
 	   if (empty()){
 		   return null;
 	   }
-	   WAVLNode current = root;
+	   return max_node.value;
+   }
+
+	// Old format of max - without the pointer to max_node
+/*	   WAVLNode current = root;
 	   while (!(current.getRightSon() instanceof WAVLExternalNode)){
 		   current = (WAVLNode) current.getRightSon();
 	   }
 	   return current.getValue();
    }
-
+*/
   /**
    * public int[] keysToArray()
    *
