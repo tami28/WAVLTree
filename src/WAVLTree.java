@@ -258,20 +258,27 @@ public class WAVLTree {
    */
    public int delete(int k)
    {
-	   return recursiveDelete(root, k);
+	   return recursiveDelete(root, k, null);
    }
    
-   public int recursiveDelete(WAVLNode root, int k) {
+   public int recursiveDelete(WAVLNode current, int k, WAVLNode parent) {
 	   
-	   if (root.key == k){
-		   if (root.getLeftSon() == null && root.getRightSon() == null) { 
+	   if (current.key == k){
+		   if (current.getLeftSon() instanceof WAVLExternalNode && current.getRightSon() instanceof WAVLExternalNode) {
+			   if (parent != null) {
+				   if (parent.key > k)
+					   parent.leftSon = new WAVLExternalNode();
+				   else
+					   parent.rightSon = new WAVLExternalNode();
+			   } else
+				   root = null;
 			   return 0;
 			   
-		   } else if ((root.getLeftSon() instanceof WAVLExternalNode) && root.getRightSon() == null) {
+		   } else if ((current.getLeftSon() instanceof WAVLNode) && current.getRightSon() instanceof WAVLExternalNode) {
 			   //TODO: balance right
 			   return 0;
 			   
-		   } else if ((root.getLeftSon() == null) && (root.getRightSon() instanceof WAVLExternalNode)) {
+		   } else if ((current.getLeftSon() instanceof WAVLExternalNode) && (current.getRightSon() instanceof WAVLNode)) {
 			   //TODO: balance left
 			   return 0;
 			   
@@ -281,15 +288,15 @@ public class WAVLTree {
 			   
 		   }
 			   
-	   } else if (root.key > k) {
+	   } else if (current.key > k) {
 		   if (root.getRightSon() instanceof WAVLNode) {
-			   return recursiveDelete((WAVLNode) root.getRightSon(), k);
+			   return recursiveDelete((WAVLNode) root.getRightSon(), k, current);
 		   } else {
 			   return -1;
 		   }
 	   } else {
-		   if (root.getLeftSon() instanceof WAVLNode) {
-			   return recursiveDelete((WAVLNode) root.getLeftSon(), k);
+		   if (current.getLeftSon() instanceof WAVLNode) {
+			   return recursiveDelete((WAVLNode) current.getLeftSon(), k, current);
 		   } else {
 			   return -1;
 		   }
