@@ -143,28 +143,31 @@ public class WAVLTree {
 	   
 	   //if this is not the root  of the tree:
 	   child = (WAVLNode)source.getLeftSon();
-	   if (source.getParent() != null){
-		   WAVLNode grandfather = (WAVLNode)source.getParent();
-		   grandfather.setRightSon(child);
-		   child.setParent(grandfather);   
-		  
-	   }
-	   //this is the root, need a different approach:
-	   else{
-		   //source is root, we are not losing information:
-		   this.root =child;
-		   this.root.setParent(null);
-	   }
+       int sourceKey = source.getKey();
+	   String sourceValue = source.getValue();
+       
+       source.setKey(child.getKey());
+	   source.setValue(child.getValue());
+	   source.setLeftSon(child.getLeftSon());
+	   source.getLeftSon().setParent(source);
 	   
 	   AbsWAVLNode temp= child.getRightSon();
-	   child.setRightSon(source);
-	   source.setParent(child);
+	   AbsWAVLNode temp2=source.getRightSon();
 	   
+	   //add the original node in place:
+	   source.setRightSon(new WAVLNode(sourceKey, sourceValue));
+	   source.getRightSon().setParent(source);
+	   
+	   //continue working on the node with original data:
+	   source = (WAVLNode) source.getRightSon();
 	   source.setLeftSon(temp);
+	   source.setRightSon(temp2);
 	   temp.setParent(source);
-	   
+	   temp2.setParent(source);
 	   source.updateRank();
 	   source.updateSize();
+	   source.getParent().updateRank();
+	   source.getParent().updateSize();
 	   return count;
    }
    
@@ -192,50 +195,52 @@ public class WAVLTree {
 		   child.updateRank();
 		   child.updateSize();
 	   }
-	   //from now handle left-left situation:
-	   
-	   //if this is not the root  of the tree:
+	   //from now handle rigght-right situation:
 	   child = (WAVLNode)source.getRightSon();
-	   if (source.getParent() != null){
-		   WAVLNode grandfather = (WAVLNode)source.getParent();
-		   grandfather.setLeftSon(child);
-		   child.setParent(grandfather);   
-		  
-	   }
-	   //this is the root, need a different approach:
-	   else{
-		   //source is root, we are not losing information:
-		   this.root =child;
-		   this.root.setParent(null);
-	   }
+	   int sourceKey = source.getKey();
+	   String sourceValue = source.getValue();
+	   //ling grandparent to child:
+	   source.setKey(child.getKey());
+	   source.setValue(child.getValue());
+	   source.setRightSon(child.getRightSon());
+	   source.getRightSon().setParent(source);
 	   
 	   AbsWAVLNode temp= child.getLeftSon();
-	   child.setLeftSon(source);
-	   source.setParent(child);
+	   AbsWAVLNode temp2=source.getLeftSon();
 	   
+	   //add the original node in place:
+	   source.setLeftSon(new WAVLNode(sourceKey, sourceValue));
+	   source.getLeftSon().setParent(source);
+	   
+	   //continue working on the node with original data:
+	   source = (WAVLNode) source.getLeftSon();
 	   source.setRightSon(temp);
-	   temp.setParent(source);
+	   source.setLeftSon(temp2);
+       temp.setParent(source);
+	   temp2.setParent(source);
 	   source.updateRank();
 	   source.updateSize();
+	   source.getParent().updateRank();
+	   source.getParent().updateSize();
 	   return count;
-   }
-   
+   }   
    
    //TODO delete this!!!
    
-   public void breadthPrint() {
+   public String toString() {
+	   StringBuffer print = new StringBuffer();
 	   Queue<AbsWAVLNode> queue = new LinkedList<AbsWAVLNode>() ;
        if (root == null)
-           return;
+           return null;
        queue.clear();
        queue.add(root);
        while(!queue.isEmpty()){
     	   WAVLNode node = (WAVLNode)queue.remove();
-           System.out.print(node.getKey()+":"+node.getValue() + " " );
+           print.append(node.getKey()+":"+node.getValue() + " " );
            if(!(node.getLeftSon() instanceof WAVLExternalNode)) queue.add(node.getLeftSon());
            if(!(node.getRightSon() instanceof WAVLExternalNode)) queue.add(node.getRightSon());
        }
-
+       return print.toString();
    }
    //TODO delete until here
 
