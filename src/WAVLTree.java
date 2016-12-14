@@ -100,25 +100,29 @@ public class WAVLTree {
    
    private int rebalance(WAVLNode node, int count){
 	   //increase rank by 1
-	   node.updateSize();
+	   int rankBefore = node.getRank();
 	   node.updateRank();
-	   //if this causes a problem, rotate:
-	   int ranksDiff = node.getRankDiff();
-	   //the size of the left is bigger then the right, the left is the place to balance:
-	   if (ranksDiff == 2){
-		   count+=rebalanceLeftSide(node);
-	   }
-	   else{
-		   //The rank of the right subtree is bigger, adjust it:
-		   if(ranksDiff == -2){
-			  count+=rebalanceRightSide(node);
+	   if (rankBefore != node.getRank()){
+		   count ++;
+		   //if this causes a problem, rotate:
+		   int ranksDiff = node.getRankDiff();
+		   //the size of the left is bigger then the right, the left is the place to balance:
+		   if (ranksDiff == 2){
+			   count+=rebalanceLeftSide(node);
 		   }
-	   }
-	   if (node.getParent() != null){
-		   count =rebalance(node.getParent(), count);   
-	   }
-	   
+		   else{
+			   //The rank of the right subtree is bigger, adjust it:
+			   if(ranksDiff == -2){
+				  count+=rebalanceRightSide(node);
+			   }
+		   }
+		   if (node.getParent() != null){
+			   count =rebalance(node.getParent(), count);   
+		   }
+		   
+		}
 	   return count;
+	   
    }
    
    private int rebalanceLeftSide(WAVLNode source){
@@ -141,7 +145,6 @@ public class WAVLTree {
 		   child.setRightSon(temp);
 		   temp.setParent(child);
 		   child.updateRank();
-		   child.updateSize();
 	   }
 	   //from now handle left-left situation:
 	   
@@ -169,9 +172,7 @@ public class WAVLTree {
 	   temp.setParent(source);
 	   temp2.setParent(source);
 	   source.updateRank();
-	   source.updateSize();
 	   source.getParent().updateRank();
-	   source.getParent().updateSize();
 	   return count;
    }
    
@@ -197,7 +198,6 @@ public class WAVLTree {
 		   child.setLeftSon(temp);
 		   temp.setParent(child);
 		   child.updateRank();
-		   child.updateSize();
 	   }
 	   //from now handle rigght-right situation:
 	   child = (WAVLNode)source.getRightSon();
@@ -223,9 +223,7 @@ public class WAVLTree {
        temp.setParent(source);
 	   temp2.setParent(source);
 	   source.updateRank();
-	   source.updateSize();
 	   source.getParent().updateRank();
-	   source.getParent().updateSize();
 	   return count;
    }   
    
@@ -240,7 +238,7 @@ public class WAVLTree {
        queue.add(root);
        while(!queue.isEmpty()){
     	   WAVLNode node = (WAVLNode)queue.remove();
-           print.append(node.getKey()+":"+node.getValue() + " " );
+           print.append(node.toString() + " ");
            if(!(node.getLeftSon() instanceof WAVLExternalNode)) queue.add(node.getLeftSon());
            if(!(node.getRightSon() instanceof WAVLExternalNode)) queue.add(node.getRightSon());
        }
@@ -373,18 +371,6 @@ public class WAVLTree {
 	  
   }
   
-  /*
-  private int[] keysToArray(WAVLNode root, int[] arr, int low, int high){
-	  int middle = (low+high)/2;
-	  if (!(root.getLeftSon() instanceof WAVLExternalNode)){
-		  arr = keysToArray((WAVLNode) root.getLeftSon(),arr, low, middle);
-	  }
-	  if (!(root.getRightSon() instanceof WAVLExternalNode)){
-		  arr = keysToArray((WAVLNode)root.getRightSon(), arr, middle, high);
-	  }
-	  return arr;
-  }
-*/
   /**
    * public String[] infoToArray()
    *
@@ -421,7 +407,6 @@ public class WAVLTree {
    */
    public static abstract class AbsWAVLNode {
 	   	protected int rank;
-	   	protected int size;
 	   	protected WAVLNode parent;
 	   	
 	   	public WAVLNode getParent() {
@@ -439,14 +424,9 @@ public class WAVLTree {
 	   	public void setRank(int rank) {
 			this.rank = rank;
 		}
-	   	public int getSize() {
-			return size;
-		}
-
-		public void setSize(int size) {
-			this.size = size;
-		}
-		
+	   	public abstract int getSize();
+	   	public abstract String toString();
+	
 
 	}
    
@@ -460,7 +440,6 @@ public class WAVLTree {
 	  public WAVLNode (int key, String value){
 		  this.setKey(key);
 		  this.setValue(value);
-		  setSize(0);
 		  setRank(0);
 		  setParent(null);
 		  this.leftSon = new WAVLExternalNode();
@@ -477,9 +456,6 @@ public class WAVLTree {
 		  setRank((Math.max(getLeftSon().getRank(), getRightSon().getRank())) + 1);
 	  }
 	  
-	  public void updateSize(){
-		  setSize(rightSon.getSize() + leftSon.getSize() + 1);
-	  }
 
 	public String getValue() {
 		return value;
@@ -513,6 +489,16 @@ public class WAVLTree {
 		this.rightSon = temp;
 	}
 
+	@Override
+	public int getSize() {
+		return (rightSon.getSize() + leftSon.getSize() +1);
+	}
+
+	@Override
+	public String toString() {
+		return key+":"+value;
+	}
+
 
   
   }
@@ -520,8 +506,17 @@ public class WAVLTree {
   public static class WAVLExternalNode extends AbsWAVLNode{
 	  public WAVLExternalNode (){
 		  this.setRank(-1);
-		  this.setSize(0);
 	  }
+
+	@Override
+	public int getSize() {
+		return 0;
+	}
+
+	@Override
+	public String toString() {
+		return null;
+	}
   }
 
 }
