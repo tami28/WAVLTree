@@ -13,6 +13,10 @@ import java.util.Queue;
 public class WAVLTree {
 
 	private WAVLNode root = null;
+	private WAVLNode min_node = null;
+	private WAVLNode max_node = null;
+
+	//TODO - update pointer to min max
 	
 	/**
    	* public boolean empty()
@@ -299,7 +303,11 @@ public class WAVLTree {
 	   if (empty()){
 		   return null;
 	   }
-	   
+	   return min_node.value;
+   }
+
+// Old format of min - without the pointer to min_node
+/*
 	   WAVLNode current = root;
 	   //While we can go left - there is a smaller key.. we will return the value of the leftmost node
 	   while (!(current.getLeftSon() instanceof WAVLExternalNode)){
@@ -307,7 +315,7 @@ public class WAVLTree {
 	   }
 	   return current.getValue(); // to be replaced by student code
    }
-
+*/
    /**
     * public String max()
     *
@@ -319,13 +327,17 @@ public class WAVLTree {
 	   if (empty()){
 		   return null;
 	   }
-	   WAVLNode current = root;
+	   return max_node.value;
+   }
+
+	// Old format of max - without the pointer to max_node
+/*	   WAVLNode current = root;
 	   while (!(current.getRightSon() instanceof WAVLExternalNode)){
 		   current = (WAVLNode) current.getRightSon();
 	   }
 	   return current.getValue();
    }
-
+*/
   /**
    * public int[] keysToArray()
    *
