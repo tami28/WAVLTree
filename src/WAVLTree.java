@@ -1,3 +1,6 @@
+import java.util.LinkedList;
+import java.util.Queue;
+
 /**
  *
  * WAVLTree
@@ -56,65 +59,59 @@ public class WAVLTree {
    * returns -1 if an item with key k already exists in the tree.
    */
    public int insert(int k, String i) {
-	  return recursiveInsert(root, k, i);	// to be replaced by student code
+	   if (this.root ==null){
+		   this.root = new WAVLNode(k,i);
+		   return 0;
+	   }
+	  return recursiveInsert(root, k, i, -1);	// to be replaced by student code
    }
    
-   private int recursiveInsert (WAVLNode root, int k, String i){
-	   int count = -1;
-	   if (root ==null){
-		   root = new WAVLNode(k,i);
-	   }
-	   else{
-		   if (k < root.getKey()){
-			   if (root.getLeftSon() instanceof WAVLExternalNode){
-				   root.setLeftSon(new WAVLNode(k,i));
-				   root.getLeftSon().setParent(root);
-				   count = promote((WAVLNode) root.getLeftSon(), 0); //brings the count to zero, from now we can count rebalancing steps.
+   private int recursiveInsert (WAVLNode source, int k, String i, int count){
+	      if (k < source.getKey()){
+			   if (source.getLeftSon() instanceof WAVLExternalNode){
+				   source.setLeftSon(new WAVLNode(k,i));
+				   source.getLeftSon().setParent(source);
+				   count = rebalance((WAVLNode) source.getLeftSon(), 0); //brings the count to zero, from now we can count rebalancing steps.
 			   }
 			   else{
-				   count = recursiveInsert((WAVLNode) root.getLeftSon(), k, i);
+				   count = recursiveInsert((WAVLNode) source.getLeftSon(), k, i, count);
 			   }
 			   
 		   } //end of case: k<root.key
 		   else{
-			   if(k > root.getKey()){
-				   if(root.getRightSon() instanceof WAVLExternalNode){
-					   root.setRightSon(new WAVLNode(k,i));
-					   root.getRightSon().setParent(root);
+			   if(k > source.getKey()){
+				   if(source.getRightSon() instanceof WAVLExternalNode){
+					   source.setRightSon(new WAVLNode(k,i));
+					   source.getRightSon().setParent(source);
 					   //TODO balance
-					   count = promote((WAVLNode)root.getRightSon(), 0);
+					   count = rebalance((WAVLNode)source.getRightSon(), 0);
 				   }
 				   else{
-					   recursiveInsert((WAVLNode) root.getRightSon(), k,i );
+					   count = recursiveInsert((WAVLNode) source.getRightSon(), k,i,count );
 				   }
 			   }//end of case: k<root.key
 		   }
-	   }//and of case: root not null
-	   
 	   return count;
    }
    
-   private int promote(WAVLNode node, int count){
+   private int rebalance(WAVLNode node, int count){
 	   //increase rank by 1
-	   node.setRank((Math.max(node.getLeftSon().getRank(), node.getRightSon().getRank())) + 1);
-	   count ++;
+	   node.updateSize();
+	   node.updateRank();
 	   //if this causes a problem, rotate:
-	   int ranksDiff = node.getLeftSon().getRank()-node.getRightSon().getRank();
+	   int ranksDiff = node.getRankDiff();
 	   //the size of the left is bigger then the right, the left is the place to balance:
 	   if (ranksDiff == 2){
-		   //TODO-rotation
+		   count+=rebalanceLeftSide(node);
 	   }
 	   else{
 		   //The rank of the right subtree is bigger, adjust it:
 		   if(ranksDiff == -2){
-			   //TODO-rotation
+			  count+=rebalanceRightSide(node);
 		   }
 	   }
-	   //TODO: after rotation need to update, from which node up?
-	   //if we fix the problem by rotating, didn't finish promoting all nodes:
 	   if (node.getParent() != null){
-		   node.setRank(node.getRank() + 1);
-		   count = count + promote(node.getParent(), count);   
+		   count =rebalance(node.getParent(), count);   
 	   }
 	   
 	   return count;
@@ -139,36 +136,108 @@ public class WAVLTree {
 		   //Restore lost leaves:
 		   child.setRightSon(temp);
 		   temp.setParent(child);
+		   child.updateRank();
+		   child.updateSize();
 	   }
 	   //from now handle left-left situation:
 	   
 	   //if this is not the root  of the tree:
+	   child = (WAVLNode)source.getLeftSon();
 	   if (source.getParent() != null){
 		   WAVLNode grandfather = (WAVLNode)source.getParent();
-		   child = (WAVLNode)source.getLeftSon();
-		   grandfather.setLeftSon(child);
-		   child.setParent(grandfather);
-		   
-		   AbsWAVLNode temp= child.getRightSon();
-		   child.setRightSon(source);
-		   source.setParent(child);
-		   
-		   source.setLeftSon(temp);
-		   temp.setParent(source);
+		   grandfather.setRightSon(child);
+		   child.setParent(grandfather);   
+		  
 	   }
 	   //this is the root, need a different approach:
 	   else{
 		   //source is root, we are not losing information:
-		   this.root = (WAVLNode) source.getLeftSon();
+		   this.root =child;
 		   this.root.setParent(null);
-		   AbsWAVLNode temp = root.getRightSon();
-		   root.setRightSon(source);
-		   source.setParent(root);
-		   source.setLeftSon(temp);
-		   temp.setParent(source);
 	   }
+	   
+	   AbsWAVLNode temp= child.getRightSon();
+	   child.setRightSon(source);
+	   source.setParent(child);
+	   
+	   source.setLeftSon(temp);
+	   temp.setParent(source);
+	   
+	   source.updateRank();
+	   source.updateSize();
 	   return count;
    }
+   
+   
+   private int rebalanceRightSide(WAVLNode source){
+	   int count = 1;
+	   //This casting should be ok because we are in the case where the left side has a high rank:
+	   WAVLNode child = (WAVLNode) source.getRightSon();
+	   //If we are in the left-right case we would like to move it to a left-left situation::
+	   if (child.getRightSon().getRank() < child.getLeftSon().getRank()){
+		   count ++;
+		   WAVLNode grandchild = (WAVLNode) child.getLeftSon();
+		   AbsWAVLNode temp = grandchild.getRightSon();
+		   //move the grandchild under root:
+		   source.setRightSon(grandchild);
+		   grandchild.setParent(source);
+		   
+		   //move the child under the grandchild:
+		   grandchild.setRightSon(child);
+		   child.setParent(grandchild);
+
+		   //Restore lost leaves:
+		   child.setLeftSon(temp);
+		   temp.setParent(child);
+		   child.updateRank();
+		   child.updateSize();
+	   }
+	   //from now handle left-left situation:
+	   
+	   //if this is not the root  of the tree:
+	   child = (WAVLNode)source.getRightSon();
+	   if (source.getParent() != null){
+		   WAVLNode grandfather = (WAVLNode)source.getParent();
+		   grandfather.setLeftSon(child);
+		   child.setParent(grandfather);   
+		  
+	   }
+	   //this is the root, need a different approach:
+	   else{
+		   //source is root, we are not losing information:
+		   this.root =child;
+		   this.root.setParent(null);
+	   }
+	   
+	   AbsWAVLNode temp= child.getLeftSon();
+	   child.setLeftSon(source);
+	   source.setParent(child);
+	   
+	   source.setRightSon(temp);
+	   temp.setParent(source);
+	   source.updateRank();
+	   source.updateSize();
+	   return count;
+   }
+   
+   
+   //TODO delete this!!!
+   
+   public void breadthPrint() {
+	   Queue<AbsWAVLNode> queue = new LinkedList<AbsWAVLNode>() ;
+       if (root == null)
+           return;
+       queue.clear();
+       queue.add(root);
+       while(!queue.isEmpty()){
+    	   WAVLNode node = (WAVLNode)queue.remove();
+           System.out.print(node.getKey()+":"+node.getValue() + " " );
+           if(!(node.getLeftSon() instanceof WAVLExternalNode)) queue.add(node.getLeftSon());
+           if(!(node.getRightSon() instanceof WAVLExternalNode)) queue.add(node.getRightSon());
+       }
+
+   }
+   //TODO delete until here
 
   /**
    * public int delete(int k)
@@ -346,6 +415,18 @@ public class WAVLTree {
 		  this.leftSon.setParent(this);
 		  this.rightSon = new WAVLExternalNode();
 		  this.rightSon.setParent(this);
+	  }
+	  
+	  //This will be positive if the left tree size is bigger thhen the right, zero if equal, negative otherwise
+	  public int getRankDiff(){
+		  return leftSon.getRank() - rightSon.getRank();
+	  }
+	  public void updateRank(){
+		  setRank((Math.max(getLeftSon().getRank(), getRightSon().getRank())) + 1);
+	  }
+	  
+	  public void updateSize(){
+		  setSize(rightSon.getSize() + leftSon.getSize() + 1);
 	  }
 
 	public String getValue() {
