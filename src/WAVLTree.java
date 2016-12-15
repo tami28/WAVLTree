@@ -265,9 +265,9 @@ public class WAVLTree {
 		   if (current.getLeftSon() instanceof WAVLExternalNode && current.getRightSon() instanceof WAVLExternalNode) {
 			   if (parent != null) {
 				   if (parent.key > k)
-					   parent.leftSon = new WAVLExternalNode();
+					   return deleteLeaf(current, current.parent, true);
 				   else
-					   parent.rightSon = new WAVLExternalNode();
+					   return deleteLeaf(current, current.parent, false);
 			   } else
 				   root = null;
 			   return 0;
@@ -299,6 +299,41 @@ public class WAVLTree {
 			   return -1;
 		   }
 	   }
+   }
+   
+   public int deleteLeaf(WAVLNode current, WAVLNode parent, boolean isLeft){
+	   //delete the relevant leaf
+	   if (isLeft)
+		   parent.leftSon = new WAVLExternalNode();
+	   else
+		   parent.rightSon = new WAVLExternalNode();
+	   
+	   //update parent's rank accordingly
+	   parent.updateRank();
+	   
+	   //handle the new different structures of the tree
+	   if (parent.getRank() == 1){
+		   return 0;
+	   } else if (parent.getRank() == 0){
+		   if (parent.getParent() == null)
+			   return 0;
+		   else {
+			   if (parent.parent.getKey() > parent.getKey())
+				   return rebalanceRightSide(parent);
+			   else
+				   return rebalanceLeftSide(parent);
+		   }
+	   } else {
+		   if (isLeft)
+			   return rebalanceRightSide(parent);
+		   else
+			   return rebalanceLeftSide(parent);
+	   }
+   }
+   
+   public int deleteNode(WAVLNode current, WAVLNode parent, boolean isLeft){
+	   
+	   return 0;
    }
 
    /**
