@@ -262,6 +262,7 @@ public class WAVLTree {
    public int recursiveDelete(WAVLNode current, int k, WAVLNode parent) {
 	   
 	   if (current.key == k){
+		   //delete node in a scenario of node being a leaf
 		   if (current.getLeftSon() instanceof WAVLExternalNode && current.getRightSon() instanceof WAVLExternalNode) {
 			   if (parent != null) {
 				   if (parent.key > k)
@@ -271,21 +272,20 @@ public class WAVLTree {
 			   } else
 				   root = null;
 			   return 0;
-			   
+		  //delete node in the scenario of node being an unary node
 		   } else if ((current.getLeftSon() instanceof WAVLNode) && current.getRightSon() instanceof WAVLExternalNode) {
-			   //TODO: balance right
-			   return 0;
+			   return deleteUnaryNode(current, current.parent, true);
 			   
 		   } else if ((current.getLeftSon() instanceof WAVLExternalNode) && (current.getRightSon() instanceof WAVLNode)) {
-			   //TODO: balance left
-			   return 0;
-			   
+			   return deleteUnaryNode(current, current.parent, false);
+		   //deleting a middle node
 		   } else {
 			   //TODO: balance tree without this node
 			   return 0;
 			   
 		   }
-			   
+
+	   //searching for the correct node to delete
 	   } else if (current.key > k) {
 		   if (root.getRightSon() instanceof WAVLNode) {
 			   return recursiveDelete((WAVLNode) root.getRightSon(), k, current);
@@ -331,9 +331,24 @@ public class WAVLTree {
 	   }
    }
    
-   public int deleteNode(WAVLNode current, WAVLNode parent, boolean isLeft){
+   public int deleteUnaryNode(WAVLNode current, WAVLNode parent, boolean hasLeftLeaf){
+	   //replacing current node with it's only son
+	   if (hasLeftLeaf)
+		   current = (WAVLNode) current.getLeftSon();
+	   else
+		   current = (WAVLNode) current.getRightSon();
+
+	   if (parent == null)
+		   return 0;
 	   
-	   return 0;
+	   if (parent.getRank() - current.getRank() <= 2)
+		   return 0;
+	   else {
+		   if (parent.getKey() > current.getKey())
+			   return rebalanceRightSide(parent);
+		   else
+			   return rebalanceLeftSide(parent);
+	   }
    }
 
    /**
