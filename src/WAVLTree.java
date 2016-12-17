@@ -75,7 +75,10 @@ public class WAVLTree {
 			   if (source.getLeftSon() instanceof WAVLExternalNode){
 				   source.setLeftSon(new WAVLNode(k,i));
 				   source.getLeftSon().setParent(source);
-				   count = rebalance((WAVLNode) source.getLeftSon(), 0); //brings the count to zero, from now we can count rebalancing steps.
+				   if (k < min_node.getKey()){
+					   min_node = (WAVLNode) source.getLeftSon();
+				   }
+				   count = rebalance((WAVLNode) source, 0); //brings the count to zero, from now we can count rebalancing steps.
 			   }
 			   else{
 				   count = recursiveInsert((WAVLNode) source.getLeftSon(), k, i, count);
@@ -87,8 +90,10 @@ public class WAVLTree {
 				   if(source.getRightSon() instanceof WAVLExternalNode){
 					   source.setRightSon(new WAVLNode(k,i));
 					   source.getRightSon().setParent(source);
-					   //TODO balance
-					   count = rebalance((WAVLNode)source.getRightSon(), 0);
+					   if (k > max_node.getKey()){
+						   max_node = (WAVLNode) source.getRightSon();
+					   }
+					   count = rebalance((WAVLNode)source, 0);
 				   }
 				   else{
 					   count = recursiveInsert((WAVLNode) source.getRightSon(), k,i,count );
@@ -100,26 +105,27 @@ public class WAVLTree {
    
    private int rebalance(WAVLNode node, int count){
 	   //increase rank by 1
-	   int rankBefore = node.getRank();
-	   node.updateRank();
-	   if (rankBefore != node.getRank()){
+	   
+	   if (node.updateRank()){
 		   count ++;
-		   //if this causes a problem, rotate:
-		   int ranksDiff = node.getRankDiff();
-		   //the size of the left is bigger then the right, the left is the place to balance:
-		   if (ranksDiff == 2){
-			   count+=rebalanceLeftSide(node);
-		   }
-		   else{
-			   //The rank of the right subtree is bigger, adjust it:
-			   if(ranksDiff == -2){
-				  count+=rebalanceRightSide(node);
+		   if (!(node.isValidRankDiff())){
+			   //if this causes a problem, rotate:
+			   int ranksDiff = node.getRankDiff();
+			   //the size of the left is bigger then the right, the left is the place to balance:
+			   if (ranksDiff == 2){
+				   count+=rebalanceLeftSide(node);
 			   }
+			   else{
+				   //The rank of the right subtree is bigger, adjust it:
+				   if(ranksDiff == -2){
+					  count+=rebalanceRightSide(node);
+				   }
+			   }
+			   
 		   }
 		   if (node.getParent() != null){
-			   count =rebalance(node.getParent(), count);   
+			   count +=rebalance(node.getParent(), 0);   
 		   }
-		   
 		}
 	   return count;
 	   
@@ -145,6 +151,7 @@ public class WAVLTree {
 		   child.setRightSon(temp);
 		   temp.setParent(child);
 		   child.updateRank();
+		   count ++;
 	   }
 	   //from now handle left-left situation:
 	   
@@ -172,6 +179,7 @@ public class WAVLTree {
 	   temp.setParent(source);
 	   temp2.setParent(source);
 	   source.updateRank();
+	   count ++;
 	   source.getParent().updateRank();
 	   return count;
    }
@@ -198,6 +206,7 @@ public class WAVLTree {
 		   child.setLeftSon(temp);
 		   temp.setParent(child);
 		   child.updateRank();
+		   count++;
 	   }
 	   //from now handle rigght-right situation:
 	   child = (WAVLNode)source.getRightSon();
@@ -223,6 +232,7 @@ public class WAVLTree {
        temp.setParent(source);
 	   temp2.setParent(source);
 	   source.updateRank();
+	   count++;
 	   source.getParent().updateRank();
 	   return count;
    }   
@@ -564,8 +574,16 @@ public class WAVLTree {
 	  public int getRankDiff(){
 		  return leftSon.getRank() - rightSon.getRank();
 	  }
-	  public void updateRank(){
+	  
+	  public boolean updateRank(){
+		  int temp = rank;
 		  setRank((Math.max(getLeftSon().getRank(), getRightSon().getRank())) + 1);
+		  return rank != temp;
+		 }
+	  
+	  public boolean isValidRankDiff(){
+		  return (Math.min(getRank() - rightSon.getRank(), getRank()- leftSon.getRank()) >= 1 && 
+				  Math.max(getRank()-rightSon.getRank(), getRank()-leftSon.getRank()) <= 2);
 	  }
 	  
 
