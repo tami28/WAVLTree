@@ -75,6 +75,9 @@ public class WAVLTree {
 			   if (source.getLeftSon() instanceof WAVLExternalNode){
 				   source.setLeftSon(new WAVLNode(k,i));
 				   source.getLeftSon().setParent(source);
+				   if (k < min_node.getKey()){
+					   min_node = (WAVLNode) source.getLeftSon();
+				   }
 				   count = rebalance((WAVLNode) source, 0); //brings the count to zero, from now we can count rebalancing steps.
 			   }
 			   else{
@@ -87,7 +90,9 @@ public class WAVLTree {
 				   if(source.getRightSon() instanceof WAVLExternalNode){
 					   source.setRightSon(new WAVLNode(k,i));
 					   source.getRightSon().setParent(source);
-					   //TODO balance
+					   if (k > max_node.getKey()){
+						   max_node = (WAVLNode) source.getRightSon();
+					   }
 					   count = rebalance((WAVLNode)source, 0);
 				   }
 				   else{

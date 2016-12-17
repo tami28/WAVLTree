@@ -1,6 +1,8 @@
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Before;
@@ -66,4 +68,19 @@ public class WAVLTreeTests {
 		System.out.println(count);
 	}
 
+	@Test
+	public void testSize(){
+		ArrayList<Integer> list = new ArrayList<Integer>();
+        for (int i=0; i<10000; i++) {
+            list.add(new Integer(i));
+        }
+        Collections.shuffle(list);
+        
+        WAVLTree tree = new WAVLTree();
+        for (int i=0; i<10000; i++){
+        	tree.insert(list.get(i), "test");
+        }
+        assertEquals(10000, tree.size());
+        
+	}
 }
