@@ -3,6 +3,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.junit.Before;
@@ -37,8 +38,8 @@ public class WAVLTreeTests {
 		//Should be: 7,3,11,1,4,10,12
 		
 		//case left:right
-		assertEquals(3, tree.insert(14, "14"));//should be 0
-		assertEquals(6, tree.insert(13, "13"));//should be 2
+		assertEquals(3, tree.insert(14, "14"));
+		assertEquals(4, tree.insert(13, "13"));
 		assertEquals("7:7 3:3 11:11 1:1 4:4 10:10 13:13 12:12 14:14 ",tree.toString());
 		//Should be 7, 3, 11, 1, 4, 10, 13, 12, 14
 	}
@@ -67,6 +68,36 @@ public class WAVLTreeTests {
 		}
 		System.out.println(count);
 	}
+	
+	@Test
+	public void testGetInfoArray(){
+		WAVLTree tree = new WAVLTree();
+		String[] arr = new String[100000];
+		int count = 0;
+		int j =0;
+		for (int i=0; i<100000; i++){
+			int rand = ThreadLocalRandom.current().nextInt(-100000000, 100000000 + 1);
+			int num = tree.insert(rand, Integer.toString(rand));
+			if (num != -1){
+				count +=num;
+				arr[j] = Integer.toString(rand);
+				j++;
+			}
+			
+		}
+		String[] infoArr = tree.infoToArray();
+		String[] improvedArr = Arrays.copyOf(arr, j);
+		Arrays.sort(improvedArr, new Comparator<String>(){
+			@Override
+			public int compare(String s1, String s2) {
+				return Integer.compare(Integer.parseInt((String) s1), Integer.parseInt((String) s2));
+			}
+		});
+		for(int i=0; i<infoArr.length; i++){
+			assertEquals(improvedArr[i],infoArr[i]);
+		}
+		System.out.println(count);
+	}
 
 	@Test
 	public void testSize(){
@@ -82,5 +113,31 @@ public class WAVLTreeTests {
         }
         assertEquals(10000, tree.size());
         
+	}
+
+	@Test
+	public void testMinMaxAfterActions(){
+		WAVLTree tree = new WAVLTree();
+		String[] arr = new String[100000];
+		int j =0;
+		for (int i=0; i<20; i++){
+			int rand = ThreadLocalRandom.current().nextInt(-100000, 100000 + 1);
+			@SuppressWarnings("unused")
+			int num = tree.insert(rand, Integer.toString(rand));
+			if (num != -1){
+				arr[j] = Integer.toString(rand);
+				j++;
+			}
+			
+		}
+		arr = Arrays.copyOf(arr, j);
+		Arrays.sort(arr, new Comparator<String>(){
+			@Override
+			public int compare(String s1, String s2) {
+				return Integer.compare(Integer.parseInt((String) s1), Integer.parseInt((String) s2));
+			}
+		});
+		assertEquals(arr[0], tree.min());
+		assertEquals(arr[arr.length-1], tree.max());
 	}
 }

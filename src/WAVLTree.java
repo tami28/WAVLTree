@@ -16,7 +16,6 @@ public class WAVLTree {
 	private WAVLNode min_node = null;
 	private WAVLNode max_node = null;
 
-	//TODO - update pointer to min max
 	
 	/**
    	* public boolean empty()
@@ -65,6 +64,8 @@ public class WAVLTree {
    public int insert(int k, String i) {
 	   if (this.root ==null){
 		   this.root = new WAVLNode(k,i);
+		   this.max_node=root;
+		   this.min_node=root;
 		   return 0;
 	   }
 	  return recursiveInsert(root, k, i, -1);	// to be replaced by student code
@@ -75,10 +76,11 @@ public class WAVLTree {
 			   if (source.getLeftSon() instanceof WAVLExternalNode){
 				   source.setLeftSon(new WAVLNode(k,i));
 				   source.getLeftSon().setParent(source);
-				   if (min_node ==null || k < min_node.getKey()){
+				   if (k < min_node.getKey()){
 					   min_node = (WAVLNode) source.getLeftSon();
 				   }
 				   count = rebalance((WAVLNode) source, 0); //brings the count to zero, from now we can count rebalancing steps.
+				   
 			   }
 			   else{
 				   count = recursiveInsert((WAVLNode) source.getLeftSon(), k, i, count);
@@ -90,10 +92,11 @@ public class WAVLTree {
 				   if(source.getRightSon() instanceof WAVLExternalNode){
 					   source.setRightSon(new WAVLNode(k,i));
 					   source.getRightSon().setParent(source);
-					   if (max_node == null || k > max_node.getKey()){
+					   if (k > max_node.getKey()){
 						   max_node = (WAVLNode) source.getRightSon();
 					   }
 					   count = rebalance((WAVLNode)source, 0);
+					   
 				   }
 				   else{
 					   count = recursiveInsert((WAVLNode) source.getRightSon(), k,i,count );
@@ -158,19 +161,23 @@ public class WAVLTree {
 	   child = (WAVLNode)source.getLeftSon();
        int sourceKey = source.getKey();
 	   String sourceValue = source.getValue();
-       
+	   int maxKey = max_node.getKey();
        source.setKey(child.getKey());
 	   source.setValue(child.getValue());
 	   source.setLeftSon(child.getLeftSon());
 	   source.getLeftSon().setParent(source);
-	   
+	   if (child == min_node){
+		   min_node = source;
+	   }
 	   AbsWAVLNode temp= child.getRightSon();
 	   AbsWAVLNode temp2=source.getRightSon();
 	   
 	   //add the original node in place:
 	   source.setRightSon(new WAVLNode(sourceKey, sourceValue));
 	   source.getRightSon().setParent(source);
-	   
+	   if(maxKey == sourceKey){
+		   max_node = (WAVLNode) source.getRightSon();
+	   }
 	   //continue working on the node with original data:
 	   source = (WAVLNode) source.getRightSon();
 	   source.setLeftSon(temp);
@@ -209,15 +216,21 @@ public class WAVLTree {
 	   child = (WAVLNode)source.getRightSon();
 	   int sourceKey = source.getKey();
 	   String sourceValue = source.getValue();
+	   int minKey = min_node.getKey();
+	   
 	   //ling grandparent to child:
 	   source.setKey(child.getKey());
 	   source.setValue(child.getValue());
 	   source.setRightSon(child.getRightSon());
 	   source.getRightSon().setParent(source);
-	   
+	   if(child == max_node){
+		   max_node = source;
+	   }
 	   AbsWAVLNode temp= child.getLeftSon();
 	   AbsWAVLNode temp2=source.getLeftSon();
-	   
+	   if(minKey == sourceKey){
+		   min_node = (WAVLNode) source.getRightSon();
+	   }
 	   //add the original node in place:
 	   source.setLeftSon(new WAVLNode(sourceKey, sourceValue));
 	   source.getLeftSon().setParent(source);
@@ -498,8 +511,24 @@ public class WAVLTree {
    */
   public String[] infoToArray()
   {
-        String[] arr = new String[42]; // to be replaced by student code
-        return arr;                    // to be replaced by student code
+	  if (empty()){
+		  return null;
+	  }
+	  int size = size();
+	  String[] arr = new String[size];
+      return infoToArray(root, arr, 0);                    // to be replaced by student code
+  }
+  
+  private String[] infoToArray(WAVLNode root, String[] arr, int low){
+	  int place = low+root.getLeftSon().getSize();
+	  arr[place] = root.getValue();
+	  if (!(root.getLeftSon() instanceof WAVLExternalNode)){
+		  arr = infoToArray((WAVLNode)root.getLeftSon(), arr, low);
+	  }
+	  if (!(root.getRightSon() instanceof WAVLExternalNode)){
+		  arr =infoToArray((WAVLNode)root.getRightSon(), arr, place+1);
+	  }
+	  return arr;
   }
 
    /**
