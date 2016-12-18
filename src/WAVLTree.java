@@ -60,7 +60,7 @@ public class WAVLTree {
    * inserts an item with key k and info i to the WAVL tree.
    * the tree must remain valid (keep its invariants).
    * returns the number of rebalancing operations, or 0 if no rebalancing operations were necessary.
-   * returns -1 if an item with key k already exists in the tree.
+   * returns -1 if an ite	m with key k already exists in the tree.
    */
    public int insert(int k, String i) {
 	   if (this.root ==null){
@@ -262,30 +262,40 @@ public class WAVLTree {
    */
    public int delete(int k)
    {
-	   return recursiveDelete(root, k, null);
+	   if (search(k)!=null)
+		   return recursiveDelete(root, k, null);
+	   return -1;
    }
    
    public int recursiveDelete(WAVLNode current, int k, WAVLNode parent) {
 	   
+	   //if this is the correct node to delete, delete the node correctly
 	   if (current.key == k){
 		   //delete node in a scenario of node being a leaf
-		   if (current.getLeftSon() instanceof WAVLExternalNode && current.getRightSon() instanceof WAVLExternalNode) {
+		   if (isLeaf(current)) {
 			   if (parent != null) {
 				   if (parent.key > k)
 					   return deleteLeaf(current, current.parent, true);
 				   else
 					   return deleteLeaf(current, current.parent, false);
-			   } else
+			   } else {
 				   root = null;
+				   this.min_node = null;
+				   this.max_node = null;
+			   }
 			   return 0;
 		  //delete node in the scenario of node being an unary node
-		   } else if ((current.getLeftSon() instanceof WAVLNode) && current.getRightSon() instanceof WAVLExternalNode) {
+		   } else if (isLeftUnary(current)) {
 			   return deleteUnaryNode(current, current.parent, true);
 			   
-		   } else if ((current.getLeftSon() instanceof WAVLExternalNode) && (current.getRightSon() instanceof WAVLNode)) {
+		   } else if (isRightUnary(current)) {
 			   return deleteUnaryNode(current, current.parent, false);
-		   //deleting a middle node
+		   //deleting a none-unary node
 		   } else {
+			   WAVLNode temp = findSuccessor(current, current.key);
+			   current.setKey(temp.key);
+			   current.setValue(temp.value);
+			   delete(temp.key);
 			   //TODO: balance tree without this node
 			   return 0;
 			   
@@ -293,22 +303,21 @@ public class WAVLTree {
 
 	   //searching for the correct node to delete
 	   } else if (current.key > k) {
-		   if (root.getRightSon() instanceof WAVLNode) {
-			   return recursiveDelete((WAVLNode) root.getRightSon(), k, current);
-		   } else {
-			   return -1;
-		   }
+		   return recursiveDelete((WAVLNode) root.getRightSon(), k, current);
 	   } else {
-		   if (current.getLeftSon() instanceof WAVLNode) {
-			   return recursiveDelete((WAVLNode) current.getLeftSon(), k, current);
-		   } else {
-			   return -1;
-		   }
+		   return recursiveDelete((WAVLNode) current.getLeftSon(), k, current);
 	   }
    }
    
    public int deleteLeaf(WAVLNode current, WAVLNode parent, boolean isLeft){
 	   //delete the relevant leaf
+	   if(this.min_node.key == current.key){
+		   this.min_node = parent;
+	   }
+	   if(this.max_node.key == current.key){
+		   this.max_node = parent;
+	   }
+
 	   if (isLeft)
 		   parent.leftSon = new WAVLExternalNode();
 	   else
@@ -339,10 +348,22 @@ public class WAVLTree {
    
    public int deleteUnaryNode(WAVLNode current, WAVLNode parent, boolean hasLeftLeaf){
 	   //replacing current node with it's only son
-	   if (hasLeftLeaf)
+	   boolean min_flag=false, max_flag=false;
+	   if(this.min_node.key == current.key){
+		   min_flag = true;
+	   }
+	   if(this.max_node.key == current.key){
+		   max_flag = true;
+	   }
+
+	   if (hasLeftLeaf){
 		   current = (WAVLNode) current.getLeftSon();
-	   else
+		   this.max_node = (max_flag ? current : this.max_node);
+	   }
+	   else {
 		   current = (WAVLNode) current.getRightSon();
+		   this.min_node = (min_flag ? current : this.min_node);
+	   }
 
 	   if (parent == null)
 		   return 0;
@@ -357,10 +378,44 @@ public class WAVLTree {
 	   }
    }
 
+   public boolean isLeaf(WAVLNode current){
+	   if (current.getLeftSon() instanceof WAVLExternalNode && current.getRightSon() instanceof WAVLExternalNode)
+		   return true;
+	   return false;
+   }
+
+   public boolean isLeftUnary(WAVLNode current){
+	   if (!(current.getLeftSon() instanceof WAVLExternalNode) && current.getRightSon() instanceof WAVLExternalNode)
+		   return true;
+	   return false;
+   }
+
+   public boolean isRightUnary(WAVLNode current){
+	   if ((current.getLeftSon() instanceof WAVLExternalNode) && !(current.getRightSon() instanceof WAVLExternalNode))
+		   return true;
+	   return false;
+   }
+
+   public WAVLNode findSuccessor(WAVLNode current, int k){
+	   if (isLeaf(current)){
+		   return current;
+	   }
+	   if (isLeftUnary(current)){
+		   WAVLNode lefty = (WAVLNode) findSuccessor((WAVLNode) current.getLeftSon(), k);
+		   if (k-lefty.key<k-current.key)
+			   return lefty;
+	   } else if (isRightUnary(current)){
+		   WAVLNode righty = (WAVLNode) findSuccessor((WAVLNode) current.getRightSon(), k);
+		   if (k-righty.key<k-current.key)
+			   return righty;
+	   }
+	   return current;
+   }
+
    /**
     * public String min()
     *
-    * Returns the iîfo of the item with the smallest key in the tree,
+    * Returns the info of the item with the smallest key in the tree,
     * or null if the tree is empty
     */
    public String min()
