@@ -50,6 +50,8 @@ public class WAVLTreeTests {
 		assertEquals("10:10 5:5 15:15 0:0 20:20 ",tree.toString());
 		assertEquals(3, tree.insert(-5, "-5"));
 		assertEquals("10:10 0:0 15:15 -5:-5 5:5 20:20 ",tree.toString());
+		assertEquals(height(tree.getRoot()), tree.getRoot().getRank());
+		assertEquals(-1, tree.insert(-5, "-5"));
 	}
 	
 	@Test
@@ -130,7 +132,6 @@ public class WAVLTreeTests {
 		int j =0;
 		for (int i=0; i<10000; i++){
 			int rand = ThreadLocalRandom.current().nextInt(-100000, 100000 + 1);
-			@SuppressWarnings("unused")
 			int num = tree.insert(rand, Integer.toString(rand));
 			if (num != -1){
 				arr[j] = Integer.toString(rand);
@@ -169,5 +170,22 @@ public class WAVLTreeTests {
 			valid =  isValidRank((WAVLTree.WAVLNode)node.getLeftSon()) && valid;
 		}
 		return valid;
+	}
+
+	@Test
+	public void rankEqHeightAfterInsertionsOnly(){
+		WAVLTree tree = new WAVLTree();
+		for (int i=0; i<100000; i++){
+			int rand = ThreadLocalRandom.current().nextInt(-100000000, 100000000 + 1);
+			tree.insert(rand, Integer.toString(rand));
+		}
+		assertEquals(height(tree.getRoot()), tree.getRoot().getRank());
+	}
+	
+	private int height(WAVLTree.AbsWAVLNode node){
+		if (node instanceof WAVLTree.WAVLExternalNode){
+			return -1;
+		}
+		return(Math.max(height(((WAVLTree.WAVLNode) node).getRightSon()), height(((WAVLTree.WAVLNode) node).getLeftSon()))) +1;
 	}
 }
