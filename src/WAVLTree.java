@@ -228,13 +228,13 @@ public class WAVLTree {
 	   }
 	   AbsWAVLNode temp= child.getLeftSon();
 	   AbsWAVLNode temp2=source.getLeftSon();
-	   if(minKey == sourceKey){
-		   min_node = (WAVLNode) source.getRightSon();
-	   }
+	   
 	   //add the original node in place:
 	   source.setLeftSon(new WAVLNode(sourceKey, sourceValue));
 	   source.getLeftSon().setParent(source);
-	   
+	   if(minKey == sourceKey){
+		   min_node = (WAVLNode) source.getLeftSon();
+	   }
 	   //continue working on the node with original data:
 	   source = (WAVLNode) source.getLeftSon();
 	   source.setRightSon(temp);
@@ -544,6 +544,10 @@ public class WAVLTree {
 	   return root.getSize();
    }
 
+   public WAVLNode getRoot() {
+		return root;
+	}
+
   /**
    * public class WAVLNode
    *
@@ -607,6 +611,9 @@ public class WAVLTree {
 		 }
 	  
 	  public boolean isValidRankDiff(){
+		  if(rightSon instanceof WAVLExternalNode && leftSon instanceof WAVLExternalNode){
+			  return(rank ==0);
+		  }
 		  return (Math.min(getRank() - rightSon.getRank(), getRank()- leftSon.getRank()) >= 1 && 
 				  Math.max(getRank()-rightSon.getRank(), getRank()-leftSon.getRank()) <= 2);
 	  }
@@ -674,6 +681,7 @@ public class WAVLTree {
 	}
   }
 
+  
 }
   
 

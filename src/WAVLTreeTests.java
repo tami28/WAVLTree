@@ -1,4 +1,4 @@
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,19 +29,27 @@ public class WAVLTreeTests {
 		assertEquals(2, tree.insert(4, "4"));
 		assertEquals(4, tree.insert(3, "3"));
 		assertEquals("7:7 3:3 10:10 1:1 4:4 ",tree.toString());
-		//Should be: 7,3,10,1,4
 		
 		//case right:right
 		assertEquals(1, tree.insert(11, "11"));
 		assertEquals(3, tree.insert(12, "12"));
 		assertEquals("7:7 3:3 11:11 1:1 4:4 10:10 12:12 ", tree.toString());
-		//Should be: 7,3,11,1,4,10,12
 		
 		//case left:right
 		assertEquals(3, tree.insert(14, "14"));
 		assertEquals(4, tree.insert(13, "13"));
 		assertEquals("7:7 3:3 11:11 1:1 4:4 10:10 13:13 12:12 14:14 ",tree.toString());
-		//Should be 7, 3, 11, 1, 4, 10, 13, 12, 14
+		
+		//another order creating a 2-2 node in insert:
+		tree = new WAVLTree();
+		assertEquals(0,tree.insert(10, "10"));
+		assertEquals(1, tree.insert(5, "5"));
+		assertEquals(0,tree.insert(15, "15"));
+		assertEquals(2,tree.insert(0, "0"));
+		assertEquals(1, tree.insert(20, "20"));
+		assertEquals("10:10 5:5 15:15 0:0 20:20 ",tree.toString());
+		assertEquals(3, tree.insert(-5, "-5"));
+		assertEquals("10:10 0:0 15:15 -5:-5 5:5 20:20 ",tree.toString());
 	}
 	
 	@Test
@@ -120,7 +128,7 @@ public class WAVLTreeTests {
 		WAVLTree tree = new WAVLTree();
 		String[] arr = new String[100000];
 		int j =0;
-		for (int i=0; i<20; i++){
+		for (int i=0; i<10000; i++){
 			int rand = ThreadLocalRandom.current().nextInt(-100000, 100000 + 1);
 			@SuppressWarnings("unused")
 			int num = tree.insert(rand, Integer.toString(rand));
@@ -139,5 +147,27 @@ public class WAVLTreeTests {
 		});
 		assertEquals(arr[0], tree.min());
 		assertEquals(arr[arr.length-1], tree.max());
+	}
+
+	@Test
+	public void testRanksValidityAfterInsesrtions(){
+		WAVLTree tree = new WAVLTree();
+		for (int i=0; i<100000; i++){
+			int rand = ThreadLocalRandom.current().nextInt(-100000000, 100000000 + 1);
+			tree.insert(rand, Integer.toString(rand));
+		}
+		assertTrue(isValidRank(tree.getRoot()));
+		
+	}
+	
+	private boolean isValidRank(WAVLTree.WAVLNode node){
+		boolean valid = node.isValidRankDiff();
+		if(node.getRightSon() instanceof WAVLTree.WAVLNode){
+			valid = isValidRank((WAVLTree.WAVLNode) node.getRightSon()) && valid;
+		}
+		if (node.getLeftSon() instanceof WAVLTree.WAVLNode){
+			valid =  isValidRank((WAVLTree.WAVLNode)node.getLeftSon()) && valid;
+		}
+		return valid;
 	}
 }
