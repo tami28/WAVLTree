@@ -20,19 +20,19 @@ public class WAVLTreeTests {
 		//case left:left
 		assertEquals(0,tree.insert(10, "10"));
 		assertEquals(1, tree.insert(7,"7"));
-		assertEquals(4, tree.insert(1, "1"));
+		assertEquals(3, tree.insert(1, "1"));
 		assertEquals(tree.toString(), "7:7 1:1 10:10 ");
 
 		
 		//case right:left
-		assertEquals(2, tree.insert(4, "4"));//should be 0
-		assertEquals(6, tree.insert(3, "3"));//should be 2
+		assertEquals(2, tree.insert(4, "4"));
+		assertEquals(4, tree.insert(3, "3"));
 		assertEquals("7:7 3:3 10:10 1:1 4:4 ",tree.toString());
 		//Should be: 7,3,10,1,4
 		
 		//case right:right
-		assertEquals(1, tree.insert(11, "11"));//should be 0
-		assertEquals(4, tree.insert(12, "12"));//should be 1
+		assertEquals(1, tree.insert(11, "11"));
+		assertEquals(3, tree.insert(12, "12"));
 		assertEquals("7:7 3:3 11:11 1:1 4:4 10:10 12:12 ", tree.toString());
 		//Should be: 7,3,11,1,4,10,12
 		

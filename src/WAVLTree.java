@@ -75,7 +75,7 @@ public class WAVLTree {
 			   if (source.getLeftSon() instanceof WAVLExternalNode){
 				   source.setLeftSon(new WAVLNode(k,i));
 				   source.getLeftSon().setParent(source);
-				   if (k < min_node.getKey()){
+				   if (min_node ==null || k < min_node.getKey()){
 					   min_node = (WAVLNode) source.getLeftSon();
 				   }
 				   count = rebalance((WAVLNode) source, 0); //brings the count to zero, from now we can count rebalancing steps.
@@ -90,7 +90,7 @@ public class WAVLTree {
 				   if(source.getRightSon() instanceof WAVLExternalNode){
 					   source.setRightSon(new WAVLNode(k,i));
 					   source.getRightSon().setParent(source);
-					   if (k > max_node.getKey()){
+					   if (max_node == null || k > max_node.getKey()){
 						   max_node = (WAVLNode) source.getRightSon();
 					   }
 					   count = rebalance((WAVLNode)source, 0);
@@ -151,7 +151,6 @@ public class WAVLTree {
 		   child.setRightSon(temp);
 		   temp.setParent(child);
 		   child.updateRank();
-		   count ++;
 	   }
 	   //from now handle left-left situation:
 	   
@@ -179,7 +178,6 @@ public class WAVLTree {
 	   temp.setParent(source);
 	   temp2.setParent(source);
 	   source.updateRank();
-	   count ++;
 	   source.getParent().updateRank();
 	   return count;
    }
@@ -206,7 +204,6 @@ public class WAVLTree {
 		   child.setLeftSon(temp);
 		   temp.setParent(child);
 		   child.updateRank();
-		   count++;
 	   }
 	   //from now handle rigght-right situation:
 	   child = (WAVLNode)source.getRightSon();
@@ -232,7 +229,6 @@ public class WAVLTree {
        temp.setParent(source);
 	   temp2.setParent(source);
 	   source.updateRank();
-	   count++;
 	   source.getParent().updateRank();
 	   return count;
    }   
