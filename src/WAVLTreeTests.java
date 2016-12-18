@@ -188,4 +188,43 @@ public class WAVLTreeTests {
 		}
 		return(Math.max(height(((WAVLTree.WAVLNode) node).getRightSon()), height(((WAVLTree.WAVLNode) node).getLeftSon()))) +1;
 	}
+
+	@Test
+	public void insertDeleteActions(){
+		ArrayList<Integer> list = new ArrayList<Integer>();
+        for (int i=0; i<10000; i++) {
+            list.add(new Integer(i));
+        }
+        Collections.shuffle(list);
+        
+        WAVLTree tree = new WAVLTree();
+        int maxActions = 10000;
+        int counter = 0;
+        ArrayList<Integer> added = new ArrayList<Integer>();
+        //insert k items:
+        while (maxActions >0){
+        	int k = ThreadLocalRandom.current().nextInt(0, maxActions + 1);
+        	maxActions = maxActions -k;
+        	//insertions
+        	System.out.println("inserting " + k + "items:");
+        	for (int i=0; i<k; i++){
+        		counter += tree.insert(list.get(i), Integer.toString(list.get(i))); //We don't have double cases here, different test
+        		added.add(list.get(i));
+        	}
+        	//deletions
+        	k = ThreadLocalRandom.current().nextInt(0,Math.min(added.size(), maxActions)+ 1);
+        	System.out.println("deleting " + k + "items:");
+        	maxActions = maxActions -k;
+        	Collections.shuffle(added);
+        	for (int i=0; i<k; i++){
+        		counter += tree.delete(added.get(i));
+        		added.remove(i);
+        		
+        	}
+        	
+        	
+        }
+        System.out.println(counter);
+        assertTrue(isValidRank(tree.getRoot()));
+	}
 }
