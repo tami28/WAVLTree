@@ -50,7 +50,7 @@ public class WAVLTreeTests {
 		assertEquals("10:10 5:5 15:15 0:0 20:20 ",tree.toString());
 		assertEquals(3, tree.insert(-5, "-5"));
 		assertEquals("10:10 0:0 15:15 -5:-5 5:5 20:20 ",tree.toString());
-		assertEquals(height(tree.getRoot()), tree.getRoot().getRank());
+		assertEquals(tree.height(), tree.getRoot().getRank());
 		assertEquals(-1, tree.insert(-5, "-5"));
 		assertTrue(tree.isValidTree());
 	}
@@ -170,16 +170,11 @@ public class WAVLTreeTests {
 			int rand = ThreadLocalRandom.current().nextInt(-100000000, 100000000 + 1);
 			tree.insert(rand, Integer.toString(rand));
 		}
-		assertEquals(height(tree.getRoot()), tree.getRoot().getRank());
+		assertEquals(tree.height(), tree.getRoot().getRank());
 		assertTrue(tree.isValidTree());
 	}
 	
-	private int height(WAVLTree.AbsWAVLNode node){
-		if (node instanceof WAVLTree.WAVLExternalNode){
-			return -1;
-		}
-		return(Math.max(height(((WAVLTree.WAVLNode) node).getRightSon()), height(((WAVLTree.WAVLNode) node).getLeftSon()))) +1;
-	}
+
 
 	@Test
 	public void insertDeleteActions(){

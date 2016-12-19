@@ -362,6 +362,20 @@ public class WAVLTree {
 		}
 		return valid;
 	}
+   
+	public int height(){
+		if(root ==null){
+			return 0;
+		}
+		return height(root);
+	}
+	
+	private int height(AbsWAVLNode  node){
+		if (node instanceof WAVLTree.WAVLExternalNode){
+			return -1;
+		}
+		return(Math.max(height(((WAVLTree.WAVLNode) node).getRightSon()), height(((WAVLTree.WAVLNode) node).getLeftSon()))) +1;
+	}
    //TODO delete until here
 
   /**
