@@ -39,7 +39,7 @@ public class WAVLTreeTests {
 		assertEquals(3, tree.insert(14, "14"));
 		assertEquals(4, tree.insert(13, "13"));
 		assertEquals("7:7 3:3 11:11 1:1 4:4 10:10 13:13 12:12 14:14 ",tree.toString());
-		
+		assertTrue(tree.isValidTree());
 		//another order creating a 2-2 node in insert:
 		tree = new WAVLTree();
 		assertEquals(0,tree.insert(10, "10"));
@@ -52,6 +52,7 @@ public class WAVLTreeTests {
 		assertEquals("10:10 0:0 15:15 -5:-5 5:5 20:20 ",tree.toString());
 		assertEquals(height(tree.getRoot()), tree.getRoot().getRank());
 		assertEquals(-1, tree.insert(-5, "-5"));
+		assertTrue(tree.isValidTree());
 	}
 	
 	@Test
@@ -157,20 +158,10 @@ public class WAVLTreeTests {
 			int rand = ThreadLocalRandom.current().nextInt(-100000000, 100000000 + 1);
 			tree.insert(rand, Integer.toString(rand));
 		}
-		assertTrue(isValidRank(tree.getRoot()));
+		assertTrue(tree.isValidTree());
 		
 	}
 	
-	private boolean isValidRank(WAVLTree.WAVLNode node){
-		boolean valid = node.isValidRankDiff();
-		if(node.getRightSon() instanceof WAVLTree.WAVLNode){
-			valid = isValidRank((WAVLTree.WAVLNode) node.getRightSon()) && valid;
-		}
-		if (node.getLeftSon() instanceof WAVLTree.WAVLNode){
-			valid =  isValidRank((WAVLTree.WAVLNode)node.getLeftSon()) && valid;
-		}
-		return valid;
-	}
 
 	@Test
 	public void rankEqHeightAfterInsertionsOnly(){
@@ -180,6 +171,7 @@ public class WAVLTreeTests {
 			tree.insert(rand, Integer.toString(rand));
 		}
 		assertEquals(height(tree.getRoot()), tree.getRoot().getRank());
+		assertTrue(tree.isValidTree());
 	}
 	
 	private int height(WAVLTree.AbsWAVLNode node){
@@ -198,7 +190,7 @@ public class WAVLTreeTests {
         Collections.shuffle(list);
         
         WAVLTree tree = new WAVLTree();
-        int maxActions = 10000;
+        int maxActions = 100;
         int counter = 0;
         ArrayList<Integer> added = new ArrayList<Integer>();
         //insert k items:
@@ -225,6 +217,6 @@ public class WAVLTreeTests {
         	
         }
         System.out.println(counter);
-        assertTrue(isValidRank(tree.getRoot()));
+        assertTrue(tree.isValidTree());
 	}
 }

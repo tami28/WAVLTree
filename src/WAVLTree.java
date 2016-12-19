@@ -43,10 +43,10 @@ public class WAVLTree {
 		if (current.key == k) {
 			return current.value;
 		  
-		} else if((current.key > k) && (current.getRightSon() instanceof AbsWAVLNode)) {
+		} else if((current.key > k) && (current.getRightSon() instanceof WAVLNode)) {
 			return searchBranch(k, (WAVLNode) current.getRightSon());
 			   
-		} else if((current.key < k) && (current.getLeftSon() instanceof AbsWAVLNode)) {
+		} else if((current.key < k) && (current.getLeftSon() instanceof WAVLNode)) {
 			return searchBranch(k, (WAVLNode) current.getRightSon());
 			  
 		} else 
@@ -68,9 +68,45 @@ public class WAVLTree {
 		   this.min_node=root;
 		   return 0;
 	   }
-	  return recursiveInsert(root, k, i, -1);	// to be replaced by student code
+	  //return recursiveInsert(root, k, i, -1);	// to be replaced by student code
+	   return anotherRecursiveInsert(k, i);
    }
    
+   /**
+    * recursive method. this uses a bottom upu search (like exercise 3) which means we get a better amortized time!
+    * @param k - key to insert
+    * @param i value of the key
+    * @return number of rebalancing steps done
+    */
+   private int anotherRecursiveInsert(int k, String i){
+	   //first we need to now where to put the new node:
+	   WAVLNode closest = findClosestNode(k);
+	   //if we've found the node itself - we don't want to insert..
+	   if (closest.getKey() == k){
+		   return -1;
+	   }
+	   //insert the node to the left\right according to it's size. From the way we found the closest we know that
+	   //the right pllace is an external node so no need to check here again:
+	   if(closest.getKey() > k){
+		   closest.setLeftSon(new WAVLNode(k, i));
+		   closest.getLeftSon().setParent(closest);
+		   //can't forget to update min!
+		   if (k < min_node.getKey()){
+			   min_node = (WAVLNode) closest.getLeftSon();
+		   }
+	   }
+	   else{
+		   closest.setRightSon(new WAVLNode(k,i));
+		   closest.getRightSon().setParent(closest);
+		   //can't forget to update max!
+		   if (k > max_node.getKey()){
+			   max_node = (WAVLNode) closest.getRightSon();
+		   }
+	   }
+	   return rebalance(closest, 0);
+   }
+   
+   /*
    private int recursiveInsert (WAVLNode source, int k, String i, int count){
 	      if (k < source.getKey()){
 			   if (source.getLeftSon() instanceof WAVLExternalNode){
@@ -105,12 +141,19 @@ public class WAVLTree {
 		   }
 	   return count;
    }
+   */
    
+   /**
+    * recursive method to rebalance the tree bottom up:
+    * @param node current node to update and balance
+    * @param count number of balancing steps so far
+    * @return number of balancing steps done
+    */
    private int rebalance(WAVLNode node, int count){
-	   //increase rank by 1
-	   
+	   //if the rank hasn't changed, we can stop rebalancing:
 	   if (node.updateRank()){
 		   count ++;
+		   //if we need  to do rotations:
 		   if (!(node.isValidRankDiff())){
 			   //if this causes a problem, rotate:
 			   int ranksDiff = node.getRankDiff();
@@ -126,12 +169,49 @@ public class WAVLTree {
 			   }
 			   
 		   }
+		   //continue up until rott/ a node that doesn't get effected by the update:
 		   if (node.getParent() != null){
 			   count +=rebalance(node.getParent(), 0);   
 		   }
 		}
 	   return count;
 	   
+   }
+   
+   /**
+    * 
+    * @param k key to search for
+    * @return the node with the closest key
+    */
+   private WAVLNode findClosestNode(int k){
+	   WAVLNode current = min_node;
+	   //First we go up to a common ancestor of min and k:
+	   while(current.getKey()< k){
+		   if (current == root){
+			   break;
+		   }
+		   current = current.getParent();
+	   }
+	   //now go back down till we've reached k or a node where is should be:
+	   while(current.getKey()!= k){
+		   //the whole loop is to decide which side to go or if we've reached the end of our journey:
+		   if (k<current.getKey()){
+			   if (current.getLeftSon() instanceof WAVLExternalNode){
+				 break;  
+			   } else{
+				   current=(WAVLNode)current.getLeftSon();
+			   }
+		   } else{
+			   
+			   if(current.getRightSon() instanceof WAVLExternalNode){
+				   break;
+			   } else{
+				   current = (WAVLNode)current.getRightSon();
+			   }
+		   }
+	   }
+	   //current is now either the node with k or the closest node to it:
+	   return current;
    }
    
    private int rebalanceLeftSide(WAVLNode source){
@@ -166,15 +246,15 @@ public class WAVLTree {
 	   source.setValue(child.getValue());
 	   source.setLeftSon(child.getLeftSon());
 	   source.getLeftSon().setParent(source);
-	   if (child == min_node){
-		   min_node = source;
-	   }
+
+	   //don't want to lose any data..:
 	   AbsWAVLNode temp= child.getRightSon();
 	   AbsWAVLNode temp2=source.getRightSon();
 	   
 	   //add the original node in place:
 	   source.setRightSon(new WAVLNode(sourceKey, sourceValue));
 	   source.getRightSon().setParent(source);
+	   //keep max updated:
 	   if(maxKey == sourceKey){
 		   max_node = (WAVLNode) source.getRightSon();
 	   }
@@ -223,15 +303,14 @@ public class WAVLTree {
 	   source.setValue(child.getValue());
 	   source.setRightSon(child.getRightSon());
 	   source.getRightSon().setParent(source);
-	   if(child == max_node){
-		   max_node = source;
-	   }
+	   //don't want to lose the data..
 	   AbsWAVLNode temp= child.getLeftSon();
 	   AbsWAVLNode temp2=source.getLeftSon();
 	   
 	   //add the original node in place:
 	   source.setLeftSon(new WAVLNode(sourceKey, sourceValue));
 	   source.getLeftSon().setParent(source);
+	   //keep min updated:
 	   if(minKey == sourceKey){
 		   min_node = (WAVLNode) source.getLeftSon();
 	   }
@@ -263,6 +342,26 @@ public class WAVLTree {
        }
        return print.toString();
    }
+   
+   /**
+    * 
+    * @return true if this is a valid WAVL tree..
+    */
+   public boolean isValidTree(){
+	   return isValidRank(root);
+   }
+   
+   //used to make sure all our nodes are cool and follow WAVL standards:
+   private boolean isValidRank(WAVLNode node){
+		boolean valid = node.isValidRankDiff();
+		if(node.getRightSon() instanceof WAVLTree.WAVLNode){
+			valid = isValidRank((WAVLTree.WAVLNode) node.getRightSon()) && valid;
+		}
+		if (node.getLeftSon() instanceof WAVLTree.WAVLNode){
+			valid =  isValidRank((WAVLTree.WAVLNode)node.getLeftSon()) && valid;
+		}
+		return valid;
+	}
    //TODO delete until here
 
   /**
@@ -316,7 +415,7 @@ public class WAVLTree {
 
 	   //searching for the correct node to delete
 	   } else if (current.key > k) {
-		   return recursiveDelete((WAVLNode) root.getRightSon(), k, current);
+		   return recursiveDelete((WAVLNode) current.getRightSon(), k, current);
 	   } else {
 		   return recursiveDelete((WAVLNode) current.getLeftSon(), k, current);
 	   }
@@ -440,16 +539,6 @@ public class WAVLTree {
 	   return min_node.value;
    }
 
-// Old format of min - without the pointer to min_node
-/*
-	   WAVLNode current = root;
-	   //While we can go left - there is a smaller key.. we will return the value of the leftmost node
-	   while (!(current.getLeftSon() instanceof WAVLExternalNode)){
-		   current = (WAVLNode) current.getLeftSon();
-	   }
-	   return current.getValue(); // to be replaced by student code
-   }
-*/
    /**
     * public String max()
     *
@@ -464,14 +553,7 @@ public class WAVLTree {
 	   return max_node.value;
    }
 
-	// Old format of max - without the pointer to max_node
-/*	   WAVLNode current = root;
-	   while (!(current.getRightSon() instanceof WAVLExternalNode)){
-		   current = (WAVLNode) current.getRightSon();
-	   }
-	   return current.getValue();
-   }
-*/
+	
   /**
    * public int[] keysToArray()
    *
@@ -489,12 +571,22 @@ public class WAVLTree {
 	  return keysToArray(root, arr, 0);              // to be replaced by student code
   }
   
+  /**
+   * helper recurssive method:
+   * @param root - root of the subtree
+   * @param arr - the array where we put the keys
+   * @param low - index of array to start from. Basically is how many keys before my subtree.
+   * @return sorted array of keys
+   */
   private int[] keysToArray(WAVLNode root, int[] arr, int low){
+	  //Where to put this key:
 	  int place = low+root.getLeftSon().getSize();
 	  arr[place] = root.getKey();
+	  //fill up the left side of the array:
 	  if (!(root.getLeftSon() instanceof WAVLExternalNode)){
 		  arr = keysToArray((WAVLNode)root.getLeftSon(), arr, low);
 	  }
+	  //fill up the right side of the array:
 	  if (!(root.getRightSon() instanceof WAVLExternalNode)){
 		arr = keysToArray((WAVLNode)root.getRightSon(), arr, place+1);  
 	  }
@@ -519,12 +611,22 @@ public class WAVLTree {
       return infoToArray(root, arr, 0);                    // to be replaced by student code
   }
   
+  /**
+   * recursive method to create array of values orderd by the key.
+   * @param root the subtree we are working on
+   * @param arr sorted array of values
+   * @param low index from which to insert this subtree
+   * @return array of values sorted by the key
+   */
   private String[] infoToArray(WAVLNode root, String[] arr, int low){
+	  //where to put the current value:
 	  int place = low+root.getLeftSon().getSize();
 	  arr[place] = root.getValue();
+	  //fill up the left side of the array:
 	  if (!(root.getLeftSon() instanceof WAVLExternalNode)){
 		  arr = infoToArray((WAVLNode)root.getLeftSon(), arr, low);
 	  }
+	  //fill up the right side of the array:
 	  if (!(root.getRightSon() instanceof WAVLExternalNode)){
 		  arr =infoToArray((WAVLNode)root.getRightSon(), arr, place+1);
 	  }
@@ -599,17 +701,27 @@ public class WAVLTree {
 		  this.rightSon.setParent(this);
 	  }
 	  
-	  //This will be positive if the left tree size is bigger thhen the right, zero if equal, negative otherwise
+	  /**
+	   * @return This will be positive if the left tree size is bigger thhen the right, zero if equal, negative otherwise
+	   */
 	  public int getRankDiff(){
 		  return leftSon.getRank() - rightSon.getRank();
 	  }
 	  
+	  /**
+	   * updates the rank based on its kids.
+	   * @return true if the rank was changed, false if not.
+	   */
 	  public boolean updateRank(){
 		  int temp = rank;
 		  setRank((Math.max(getLeftSon().getRank(), getRightSon().getRank())) + 1);
 		  return rank != temp;
 		 }
 	  
+	  /**
+	   * 
+	   * @return is the diff between the node and it's sons are allowed for an WAVL tree
+	   */
 	  public boolean isValidRankDiff(){
 		  if(rightSon instanceof WAVLExternalNode && leftSon instanceof WAVLExternalNode){
 			  return(rank ==0);
