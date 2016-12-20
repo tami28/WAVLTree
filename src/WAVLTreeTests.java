@@ -21,23 +21,23 @@ public class WAVLTreeTests {
 		//case left:left
 		assertEquals(0,tree.insert(10, "10"));
 		assertEquals(1, tree.insert(7,"7"));
-		assertEquals(3, tree.insert(1, "1"));
+		assertEquals(2, tree.insert(1, "1"));
 		assertEquals(tree.toString(), "7:7 1:1 10:10 ");
 
 		
 		//case right:left
 		assertEquals(2, tree.insert(4, "4"));
-		assertEquals(4, tree.insert(3, "3"));
+		assertEquals(3, tree.insert(3, "3"));
 		assertEquals("7:7 3:3 10:10 1:1 4:4 ",tree.toString());
 		
 		//case right:right
 		assertEquals(1, tree.insert(11, "11"));
-		assertEquals(3, tree.insert(12, "12"));
+		assertEquals(2, tree.insert(12, "12"));
 		assertEquals("7:7 3:3 11:11 1:1 4:4 10:10 12:12 ", tree.toString());
 		
 		//case left:right
 		assertEquals(3, tree.insert(14, "14"));
-		assertEquals(4, tree.insert(13, "13"));
+		assertEquals(3, tree.insert(13, "13"));
 		assertEquals("7:7 3:3 11:11 1:1 4:4 10:10 13:13 12:12 14:14 ",tree.toString());
 		assertTrue(tree.isValidTree());
 		//another order creating a 2-2 node in insert:
@@ -48,7 +48,7 @@ public class WAVLTreeTests {
 		assertEquals(2,tree.insert(0, "0"));
 		assertEquals(1, tree.insert(20, "20"));
 		assertEquals("10:10 5:5 15:15 0:0 20:20 ",tree.toString());
-		assertEquals(3, tree.insert(-5, "-5"));
+		assertEquals(2, tree.insert(-5, "-5"));
 		assertEquals("10:10 0:0 15:15 -5:-5 5:5 20:20 ",tree.toString());
 		assertEquals(tree.height(), tree.getRoot().getRank());
 		assertEquals(-1, tree.insert(-5, "-5"));
@@ -206,7 +206,6 @@ public class WAVLTreeTests {
         	for (int i=0; i<k; i++){
         		counter += tree.delete(added.get(i));
         		added.remove(i);
-        		
         	}
         	
         	

@@ -89,7 +89,7 @@ public class WAVLTree {
 	   //the right pllace is an external node so no need to check here again:
 	   if(closest.getKey() > k){
 		   closest.setLeftSon(new WAVLNode(k, i));
-		   closest.getLeftSon().setParent(closest);
+		   //closest.getLeftSon().setParent(closest);
 		   //can't forget to update min!
 		   if (k < min_node.getKey()){
 			   min_node = (WAVLNode) closest.getLeftSon();
@@ -97,7 +97,7 @@ public class WAVLTree {
 	   }
 	   else{
 		   closest.setRightSon(new WAVLNode(k,i));
-		   closest.getRightSon().setParent(closest);
+		   //closest.getRightSon().setParent(closest);
 		   //can't forget to update max!
 		   if (k > max_node.getKey()){
 			   max_node = (WAVLNode) closest.getRightSon();
@@ -152,7 +152,6 @@ public class WAVLTree {
    private int rebalance(WAVLNode node, int count){
 	   //if the rank hasn't changed, we can stop rebalancing:
 	   if (node.updateRank()){
-		   count ++;
 		   //if we need  to do rotations:
 		   if (!(node.isValidRankDiff())){
 			   //if this causes a problem, rotate:
@@ -168,8 +167,11 @@ public class WAVLTree {
 				   }
 			   }
 			   
+		   } else{
+			   //We just updated a rank - add to the count..
+			   count++;
 		   }
-		   //continue up until rott/ a node that doesn't get effected by the update:
+		   //continue up until root/ a node that doesn't get effected by the update:
 		   if (node.getParent() != null){
 			   count +=rebalance(node.getParent(), 0);   
 		   }
@@ -220,20 +222,8 @@ public class WAVLTree {
 	   WAVLNode child = (WAVLNode) source.getLeftSon();
 	   //If we are in the left-right case we would like to move it to a left-left situation::
 	   if (child.getLeftSon().getRank() < child.getRightSon().getRank()){
-		   count ++;
-		   WAVLNode grandchild = (WAVLNode) child.getRightSon();
-		   AbsWAVLNode temp = grandchild.getLeftSon();
-		   //move the grandchild under root:
-		   source.setLeftSon(grandchild);
-		   grandchild.setParent(source);
-		   
-		   //move the child under the grandchild:
-		   grandchild.setLeftSon(child);
-		   child.setParent(grandchild);
-		   //Restore lost leaves:
-		   child.setRightSon(temp);
-		   temp.setParent(child);
-		   child.updateRank();
+		   rotateLeftRightToLeftLeft(source, child);
+		   count++;
 	   }
 	   //from now handle left-left situation:
 	   
@@ -245,7 +235,7 @@ public class WAVLTree {
        source.setKey(child.getKey());
 	   source.setValue(child.getValue());
 	   source.setLeftSon(child.getLeftSon());
-	   source.getLeftSon().setParent(source);
+	   //source.getLeftSon().setParent(source);
 
 	   //don't want to lose any data..:
 	   AbsWAVLNode temp= child.getRightSon();
@@ -253,7 +243,7 @@ public class WAVLTree {
 	   
 	   //add the original node in place:
 	   source.setRightSon(new WAVLNode(sourceKey, sourceValue));
-	   source.getRightSon().setParent(source);
+	   //source.getRightSon().setParent(source);
 	   //keep max updated:
 	   if(maxKey == sourceKey){
 		   max_node = (WAVLNode) source.getRightSon();
@@ -262,12 +252,29 @@ public class WAVLTree {
 	   source = (WAVLNode) source.getRightSon();
 	   source.setLeftSon(temp);
 	   source.setRightSon(temp2);
-	   temp.setParent(source);
-	   temp2.setParent(source);
+	   //temp.setParent(source);
+	   //temp2.setParent(source);
 	   source.updateRank();
 	   source.getParent().updateRank();
 	   return count;
    }
+
+	private void rotateLeftRightToLeftLeft(WAVLNode source,WAVLNode child) {
+	   WAVLNode grandchild = (WAVLNode) child.getRightSon();
+	   AbsWAVLNode temp = grandchild.getLeftSon();
+	   //move the grandchild under root:
+	   source.setLeftSon(grandchild);
+	   //grandchild.setParent(source);
+	   
+	   //move the child under the grandchild:
+	   grandchild.setLeftSon(child);
+	   //child.setParent(grandchild);
+	   //Restore lost leaves:
+	   child.setRightSon(temp);
+	   //temp.setParent(child);
+	   child.updateRank();
+
+	}
    
    
    private int rebalanceRightSide(WAVLNode source){
@@ -277,20 +284,7 @@ public class WAVLTree {
 	   //If we are in the left-right case we would like to move it to a left-left situation::
 	   if (child.getRightSon().getRank() < child.getLeftSon().getRank()){
 		   count ++;
-		   WAVLNode grandchild = (WAVLNode) child.getLeftSon();
-		   AbsWAVLNode temp = grandchild.getRightSon();
-		   //move the grandchild under root:
-		   source.setRightSon(grandchild);
-		   grandchild.setParent(source);
-		   
-		   //move the child under the grandchild:
-		   grandchild.setRightSon(child);
-		   child.setParent(grandchild);
-
-		   //Restore lost leaves:
-		   child.setLeftSon(temp);
-		   temp.setParent(child);
-		   child.updateRank();
+		   rotateRightLeftToRightRight(source, child);
 	   }
 	   //from now handle rigght-right situation:
 	   child = (WAVLNode)source.getRightSon();
@@ -302,14 +296,14 @@ public class WAVLTree {
 	   source.setKey(child.getKey());
 	   source.setValue(child.getValue());
 	   source.setRightSon(child.getRightSon());
-	   source.getRightSon().setParent(source);
+	   //source.getRightSon().setParent(source);
 	   //don't want to lose the data..
 	   AbsWAVLNode temp= child.getLeftSon();
 	   AbsWAVLNode temp2=source.getLeftSon();
 	   
 	   //add the original node in place:
 	   source.setLeftSon(new WAVLNode(sourceKey, sourceValue));
-	   source.getLeftSon().setParent(source);
+	   //source.getLeftSon().setParent(source);
 	   //keep min updated:
 	   if(minKey == sourceKey){
 		   min_node = (WAVLNode) source.getLeftSon();
@@ -318,12 +312,29 @@ public class WAVLTree {
 	   source = (WAVLNode) source.getLeftSon();
 	   source.setRightSon(temp);
 	   source.setLeftSon(temp2);
-       temp.setParent(source);
-	   temp2.setParent(source);
+       //temp.setParent(source);
+	   //temp2.setParent(source);
 	   source.updateRank();
 	   source.getParent().updateRank();
 	   return count;
-   }   
+   }
+
+private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
+	WAVLNode grandchild = (WAVLNode) child.getLeftSon();
+	   AbsWAVLNode temp = grandchild.getRightSon();
+	   //move the grandchild under root:
+	   source.setRightSon(grandchild);
+	 //  grandchild.setParent(source);
+	   
+	   //move the child under the grandchild:
+	   grandchild.setRightSon(child);
+	   //child.setParent(grandchild);
+
+	   //Restore lost leaves:
+	   child.setLeftSon(temp);
+	   //temp.setParent(child);
+	   child.updateRank();
+}   
    
    //TODO delete this!!!
    
@@ -355,10 +366,10 @@ public class WAVLTree {
    private boolean isValidRank(WAVLNode node){
 		boolean valid = node.isValidRankDiff();
 		if(node.getRightSon() instanceof WAVLTree.WAVLNode){
-			valid = isValidRank((WAVLTree.WAVLNode) node.getRightSon()) && valid;
+			valid = valid && isValidRank((WAVLTree.WAVLNode) node.getRightSon());
 		}
 		if (node.getLeftSon() instanceof WAVLTree.WAVLNode){
-			valid =  isValidRank((WAVLTree.WAVLNode)node.getLeftSon()) && valid;
+			valid =  valid && isValidRank((WAVLTree.WAVLNode)node.getLeftSon());
 		}
 		return valid;
 	}
@@ -767,6 +778,7 @@ public class WAVLTree {
 
 	public void setLeftSon(AbsWAVLNode temp) {
 		this.leftSon = temp;
+		this.leftSon.setParent(this);
 	}
 
 	public AbsWAVLNode getRightSon() {
@@ -775,6 +787,7 @@ public class WAVLTree {
 
 	public void setRightSon(AbsWAVLNode temp) {
 		this.rightSon = temp;
+		this.rightSon.setParent(this);
 	}
 
 	@Override
