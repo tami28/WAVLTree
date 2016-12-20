@@ -1,0 +1,13 @@
+CB:
+
+1. finish delete
+2. tests for delete
+3. documentation
+4. -1 to size when delete success
+5. check actions in min/max
+
+Tami
+1. experiments
+2. documentation
+3. +1 to size when insert
+4. fix keysToArray\infoToArray

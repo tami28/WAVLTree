@@ -15,7 +15,7 @@ public class WAVLTree {
 	private WAVLNode root = null;
 	private WAVLNode min_node = null;
 	private WAVLNode max_node = null;
-
+	
 	
 	/**
    	* public boolean empty()
