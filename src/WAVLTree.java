@@ -41,13 +41,14 @@ public class WAVLTree {
 	  
 	public String searchBranch(int k, WAVLNode current){ 
 		//While there's still how to go down the tree (and key not found) - search through the correct path.
-		if (current.key == k) {
+		if (!(current instanceof WAVLNode))
+			return null;
+		else if (current.key == k) {
 			return current.value;
-		  
-		} else if((current.key > k) && (current.getRightSon() instanceof AbsWAVLNode)) {
+		} else if((current.key > k) && (current.getRightSon() instanceof WAVLNode)) {
 			return searchBranch(k, (WAVLNode) current.getRightSon());
 			   
-		} else if((current.key < k) && (current.getLeftSon() instanceof AbsWAVLNode)) {
+		} else if((current.key < k) && (current.getLeftSon() instanceof WAVLNode)) {
 			return searchBranch(k, (WAVLNode) current.getRightSon());
 			  
 		} else 
@@ -272,7 +273,6 @@ public class WAVLTree {
    }
    
    public int recursiveDelete(WAVLNode current, int k, WAVLNode parent) {
-	   
 	   //if this is the correct node to delete, delete the node correctly
 	   if (current.key == k){
 		   //delete node in a scenario of node being a leaf
