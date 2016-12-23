@@ -183,6 +183,13 @@ public class WAVLTree {
 	   
    }
    
+   public WAVLNode findNode(int k){
+	   WAVLNode closest = findClosestNode(k);
+	   if (closest.getKey() == k){
+		   return closest;
+	   }
+	   return null;
+   }
    /**
     * 
     * @param k key to search for
@@ -411,7 +418,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   //if this is the correct node to delete, delete the node correctly
 	   if (current.key == k){
 		   //delete node in a scenario of node being a leaf
-		   if (isLeaf(current)) {
+		   if (current.isLeaf()) {
 			   if (parent != null) {
 				   if (parent.key > k)
 					   return deleteLeaf(current, current.parent, true);
@@ -424,10 +431,10 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 			   }
 			   return 0;
 		  //delete node in the scenario of node being an unary node
-		   } else if (isLeftUnary(current)) {
+		   } else if (current.isLeftUnary()) {
 			   return deleteUnaryNode(current, current.parent, true);
 			   
-		   } else if (isRightUnary(current)) {
+		   } else if (current.isRightUnary()) {
 			   return deleteUnaryNode(current, current.parent, false);
 		   //deleting a none-unary node
 		   } else {
@@ -517,33 +524,15 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   }
    }
 
-   public boolean isLeaf(WAVLNode current){
-	   if (current.getLeftSon() instanceof WAVLExternalNode && current.getRightSon() instanceof WAVLExternalNode)
-		   return true;
-	   return false;
-   }
-
-   public boolean isLeftUnary(WAVLNode current){
-	   if (!(current.getLeftSon() instanceof WAVLExternalNode) && current.getRightSon() instanceof WAVLExternalNode)
-		   return true;
-	   return false;
-   }
-
-   public boolean isRightUnary(WAVLNode current){
-	   if ((current.getLeftSon() instanceof WAVLExternalNode) && !(current.getRightSon() instanceof WAVLExternalNode))
-		   return true;
-	   return false;
-   }
-
    public WAVLNode findSuccessor(WAVLNode current, int k){
-	   if (isLeaf(current)){
+	   if (current.isLeaf()){
 		   return current;
 	   }
-	   if (isLeftUnary(current)){
+	   if (current.isLeftUnary()){
 		   WAVLNode lefty = (WAVLNode) findSuccessor((WAVLNode) current.getLeftSon(), k);
 		   if (k-lefty.key<k-current.key)
 			   return lefty;
-	   } else if (isRightUnary(current)){
+	   } else if (current.isRightUnary()){
 		   WAVLNode righty = (WAVLNode) findSuccessor((WAVLNode) current.getRightSon(), k);
 		   if (k-righty.key<k-current.key)
 			   return righty;
@@ -744,7 +733,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   * @return is the diff between the node and it's sons are allowed for an WAVL tree
 	   */
 	  public boolean isValidRankDiff(){
-		  if(rightSon instanceof WAVLExternalNode && leftSon instanceof WAVLExternalNode){
+		  if(isLeaf()){
 			  return(rank ==0);
 		  }
 		  return (Math.min(getRank() - rightSon.getRank(), getRank()- leftSon.getRank()) >= 1 && 
@@ -790,6 +779,24 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	public String toString() {
 		return key+":"+value;
 	}
+
+		public boolean isLeaf(){
+			   if (getLeftSon() instanceof WAVLExternalNode && getRightSon() instanceof WAVLExternalNode)
+				   return true;
+			   return false;
+		   }
+
+		public boolean isLeftUnary(){
+			   if (!(getLeftSon() instanceof WAVLExternalNode) && getRightSon() instanceof WAVLExternalNode)
+				   return true;
+			   return false;
+		   }
+
+		public boolean isRightUnary(){
+			   if ((getLeftSon() instanceof WAVLExternalNode) && !(getRightSon() instanceof WAVLExternalNode))
+				   return true;
+			   return false;
+		   }
 
 
   
