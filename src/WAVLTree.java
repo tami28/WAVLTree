@@ -15,7 +15,7 @@ public class WAVLTree {
 	private WAVLNode root = null;
 	private WAVLNode min_node = null;
 	private WAVLNode max_node = null;
-	
+	private int size = 0;
 	
 	/**
    	* public boolean empty()
@@ -69,6 +69,7 @@ public class WAVLTree {
 		   this.root = new WAVLNode(k,i);
 		   this.max_node=root;
 		   this.min_node=root;
+		   this.size =1;
 		   return 0;
 	   }
 	  //return recursiveInsert(root, k, i, -1);	// to be replaced by student code
@@ -90,6 +91,7 @@ public class WAVLTree {
 	   }
 	   //insert the node to the left\right according to it's size. From the way we found the closest we know that
 	   //the right pllace is an external node so no need to check here again:
+	   size ++;
 	   if(closest.getKey() > k){
 		   closest.setLeftSon(new WAVLNode(k, i));
 		   //closest.getLeftSon().setParent(closest);
@@ -195,6 +197,13 @@ public class WAVLTree {
 	   
    }
    
+   public WAVLNode findNode(int k){
+	   WAVLNode closest = findClosestNode(k);
+	   if (closest.getKey() == k){
+		   return closest;
+	   }
+	   return null;
+   }
    /**
     * 
     * @param k key to search for
@@ -423,7 +432,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   //if this is the correct node to delete, delete the node correctly
 	   if (current.key == k){
 		   //delete node in a scenario of node being a leaf
-		   if (isLeaf(current)) {
+		   if (current.isLeaf()) {
 			   if (parent != null) {
 				   if (parent.key > k) {
 					   return deleteLeaf(current, current.parent, true, toRebalance);
@@ -648,32 +657,34 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	  if (empty()){
 		  return null;
 	  }
-	  int size=size();
 	  int[] arr = new int[size];
       
-	  return keysToArray(root, arr, 0);              // to be replaced by student code
+	  keysToArray(root, arr, 0);
+	  
+	  return arr;// to be replaced by student code
   }
   
+  
   /**
-   * helper recurssive method:
-   * @param root - root of the subtree
-   * @param arr - the array where we put the keys
-   * @param low - index of array to start from. Basically is how many keys before my subtree.
-   * @return sorted array of keys
+   * 
+   * Helper recursive method for keysToArray
+   * @param source - the source of the current subtree
+   * @param arr - the array to fill
+   * @param place - where to start the current subtree
+   * @return the place for the current subtree
    */
-  private int[] keysToArray(WAVLNode root, int[] arr, int low){
-	  //Where to put this key:
-	  int place = low+root.getLeftSon().getSize();
-	  arr[place] = root.getKey();
-	  //fill up the left side of the array:
-	  if (!(root.getLeftSon() instanceof WAVLExternalNode)){
-		  arr = keysToArray((WAVLNode)root.getLeftSon(), arr, low);
+  private int keysToArray(AbsWAVLNode source, int[] arr, int place){
+	  //if this is an external node we don't want to addqchange the placement
+	  if(source instanceof WAVLExternalNode){
+		  return place;
 	  }
-	  //fill up the right side of the array:
-	  if (!(root.getRightSon() instanceof WAVLExternalNode)){
-		arr = keysToArray((WAVLNode)root.getRightSon(), arr, place+1);  
-	  }
-	  return arr;
+	  //put all the left childs in the array:
+	  place = keysToArray(((WAVLNode)source).getLeftSon(), arr, place);
+	  //now put this one in:
+	  arr[place] = ((WAVLNode) source).getKey();
+	  //now put the right subtree in
+	  place = keysToArray(((WAVLNode)source).getRightSon(), arr, ++place);
+	  return place;
 	  
   }
   
@@ -689,31 +700,24 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	  if (empty()){
 		  return null;
 	  }
-	  int size = size();
 	  String[] arr = new String[size];
-      return infoToArray(root, arr, 0);                    // to be replaced by student code
+      infoToArray(root, arr, 0);
+      return arr;
   }
   
-  /**
-   * recursive method to create array of values orderd by the key.
-   * @param root the subtree we are working on
-   * @param arr sorted array of values
-   * @param low index from which to insert this subtree
-   * @return array of values sorted by the key
-   */
-  private String[] infoToArray(WAVLNode root, String[] arr, int low){
-	  //where to put the current value:
-	  int place = low+root.getLeftSon().getSize();
-	  arr[place] = root.getValue();
-	  //fill up the left side of the array:
-	  if (!(root.getLeftSon() instanceof WAVLExternalNode)){
-		  arr = infoToArray((WAVLNode)root.getLeftSon(), arr, low);
+
+  private int infoToArray(AbsWAVLNode source, String[] arr, int place){
+	  //if this is an external node we don't want to addqchange the placement
+	  if(source instanceof WAVLExternalNode){
+		  return place;
 	  }
-	  //fill up the right side of the array:
-	  if (!(root.getRightSon() instanceof WAVLExternalNode)){
-		  arr =infoToArray((WAVLNode)root.getRightSon(), arr, place+1);
-	  }
-	  return arr;
+	  //put all the left childs in the array:
+	  place = infoToArray(((WAVLNode)source).getLeftSon(), arr, place);
+	  //now put this one in:
+	  arr[place] = ((WAVLNode) source).getValue();
+	  //now put the right subtree in
+	  place = infoToArray(((WAVLNode)source).getRightSon(), arr, ++place);
+	  return place;
   }
 
    /**
@@ -726,7 +730,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
     */
    public int size()
    {
-	   return root.getSize();
+	   return size;
    }
 
    public WAVLNode getRoot() {
@@ -760,7 +764,6 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   	public void setRank(int rank) {
 			this.rank = rank;
 		}
-	   	public abstract int getSize();
 	   	public abstract String toString();
 	
 
@@ -806,7 +809,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   * @return is the diff between the node and it's sons are allowed for an WAVL tree
 	   */
 	  public boolean isValidRankDiff(){
-		  if(rightSon instanceof WAVLExternalNode && leftSon instanceof WAVLExternalNode){
+		  if(isLeaf()){
 			  return(rank ==0);
 		  }
 		  return (isRankDiffSmallEnough() && isRankDiffBigEnough());
@@ -854,15 +857,28 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 		this.rightSon.setParent(this);
 	}
 
-	@Override
-	public int getSize() {
-		return (rightSon.getSize() + leftSon.getSize() +1);
-	}
-
-	@Override
+		@Override
 	public String toString() {
 		return key+":"+value;
 	}
+
+		public boolean isLeaf(){
+			   if (getLeftSon() instanceof WAVLExternalNode && getRightSon() instanceof WAVLExternalNode)
+				   return true;
+			   return false;
+		   }
+
+		public boolean isLeftUnary(){
+			   if (!(getLeftSon() instanceof WAVLExternalNode) && getRightSon() instanceof WAVLExternalNode)
+				   return true;
+			   return false;
+		   }
+
+		public boolean isRightUnary(){
+			   if ((getLeftSon() instanceof WAVLExternalNode) && !(getRightSon() instanceof WAVLExternalNode))
+				   return true;
+			   return false;
+		   }
 
 
   
@@ -873,12 +889,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 		  this.setRank(-1);
 	  }
 
-	@Override
-	public int getSize() {
-		return 0;
-	}
-
-	@Override
+		@Override
 	public String toString() {
 		return null;
 	}

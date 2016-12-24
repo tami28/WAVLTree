@@ -58,7 +58,7 @@ public class WAVLTreeTests {
 	@Test
 	public void testGetKeyArray(){
 		WAVLTree tree = new WAVLTree();
-		int[] arr = new int[300000];
+		int[] arr = new int[100000];
 		int count = 0;
 		int j =0;
 		for (int i=0; i<100000; i++){
@@ -175,7 +175,6 @@ public class WAVLTreeTests {
 	}
 	
 
-
 	@Test
 	public void insertDeleteActions(){
 		ArrayList<Integer> list = new ArrayList<Integer>();
@@ -212,5 +211,64 @@ public class WAVLTreeTests {
         }
         System.out.println(counter);
         assertTrue(tree.isValidTree());
+	}
+
+	@Test
+	public void experiments(){
+		int base = 10000;
+		int[][] data = new int[10][4];
+		for (int i=1; i<=10; i++){
+			try {
+				data[i-1] = singleExperiment(i*base);
+			} catch (Exception e) {
+				fail(e.getMessage());
+			}
+		}
+		printResults(data, base);
+	}
+	
+	private void printResults(int[][] data, int base){
+		String format = "Size: %s /t Max insertion %s /t average insertions %s /t max deletion $s /t average deletions %s";
+		for (int i=0; i<10; i++ ){
+			int numActions = (i+1)*base;
+			int[] results = data[i];
+			String toPrint = String.format(format,numActions, results[1], results[0]/numActions, results[3], results[2]/numActions);
+			System.out.println(toPrint);
+		}
+	}
+	
+	private int[] singleExperiment(int size) throws Exception{
+		WAVLTree tree = new WAVLTree();
+		int[] arr = new int[size];
+		int j =0;
+		int[] data = new int[4];
+		int maxInsertions = 0, maxDeleteions =0;
+		int insertionsCounter = 0, deletionsCounter =0;
+		
+		//insert 1
+		while(j<size){
+			int rand = ThreadLocalRandom.current().nextInt(-100000, 100000 + 1);
+			int num = tree.insert(rand, Integer.toString(rand));
+			if (num != -1){
+				arr[j] = rand;
+				j++;
+				insertionsCounter += num;
+				maxInsertions = Math.max(maxInsertions, num);
+			}
+		}
+		data[0] = insertionsCounter;
+		data[1]= maxInsertions;
+		Arrays.sort(arr);
+		for (j=0; j<size; j++){
+			int actions = tree.delete(arr[j]);
+			if (actions == -1){
+				throw new Exception("didn't find node that should be there!");
+			}
+			deletionsCounter += actions;
+			maxDeleteions = Math.max(maxDeleteions, actions);
+		}
+		data[2] = deletionsCounter;
+		data[3] = maxDeleteions;
+		return data;
 	}
 }
