@@ -204,13 +204,13 @@ public class WAVLTreeTests {
         	Collections.shuffle(added);
         	for (int i=0; i<k; i++){
         		counter += tree.delete(added.get(i));
-        		added.remove(i);
         	}
         	
         	
         }
         System.out.println(counter);
         assertTrue(tree.isValidTree());
+        assert(tree.checkTreeCorrectness());
 	}
 
 	@Test
