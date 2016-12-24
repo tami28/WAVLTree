@@ -178,13 +178,13 @@ public class WAVLTreeTests {
 	@Test
 	public void insertDeleteActions(){
 		ArrayList<Integer> list = new ArrayList<Integer>();
-        for (int i=0; i<10000; i++) {
+        for (int i=0; i<100000; i++) {
             list.add(new Integer(i));
         }
         Collections.shuffle(list);
         
         WAVLTree tree = new WAVLTree();
-        int maxActions = 100;
+        int maxActions = 10000;
         int counter = 0;
         ArrayList<Integer> added = new ArrayList<Integer>();
         //insert k items:
@@ -203,8 +203,8 @@ public class WAVLTreeTests {
         	maxActions = maxActions -k;
         	Collections.shuffle(added);
         	for (int i=0; i<k; i++){
-        		counter += tree.delete(added.get(i));
-        		added.remove(i);
+        		counter += tree.delete(added.get(0));
+        		added.remove(0);
         	}
         	
         	
@@ -232,7 +232,7 @@ public class WAVLTreeTests {
 		for (int i=0; i<10; i++ ){
 			int numActions = (i+1)*base;
 			int[] results = data[i];
-			String toPrint = String.format(format,numActions, results[1], results[0]/numActions, results[3], results[2]/numActions);
+			String toPrint = String.format(format,numActions, results[1], (double)results[0]/(double)numActions, results[3], (double)results[2]/(double)numActions);
 			System.out.println(toPrint);
 		}
 	}
