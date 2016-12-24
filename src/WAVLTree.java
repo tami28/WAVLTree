@@ -69,7 +69,7 @@ public class WAVLTree {
 		   this.root = new WAVLNode(k,i);
 		   this.max_node=root;
 		   this.min_node=root;
-		   this.size =1;
+		   this.size = 1;
 		   return 0;
 	   }
 	  //return recursiveInsert(root, k, i, -1);	// to be replaced by student code
@@ -431,6 +431,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
    public int recursiveDelete(WAVLNode current, int k, WAVLNode parent, boolean toRebalance) {
 	   //if this is the correct node to delete, delete the node correctly
 	   if (current.key == k){
+		   this.size--;
 		   //delete node in a scenario of node being a leaf
 		   if (current.isLeaf()) {
 			   if (parent != null) {
