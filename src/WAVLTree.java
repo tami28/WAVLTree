@@ -424,26 +424,25 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
    /**
     * public int deleteLeaf(WAVLNode current, WAVLNode parent, boolean isLeft, boolean toRebalance)
     *
-    * deletes an item with key k from the binary tree, if it is there;
-    * the tree must remain valid (keep its invariants).
-    * returns the number of rebalancing operations, or 0 if no rebalancing operations were needed.
-    * returns -1 if an item with key k was not found in the tree.
-    */   
+    * deletes a leaf node with key k from the binary tree
+    * updates the min\max node if necessary, assigns  WAVLExternalNode as a deletion method
+    * rebalances the tree only if it's not a part of a binary deletion 
+    */
    public int deleteLeaf(WAVLNode current, WAVLNode parent, boolean isLeft, boolean toRebalance) {
-	   //delete the relevant leaf
+	   //replace the min\max node before the deletion, if relevant
 	   if(this.min_node.key == current.key){
 		   this.min_node = parent;
 	   }
 	   if(this.max_node.key == current.key){
 		   this.max_node = parent;
 	   }
-
+	   //delete the relevant leaf
 	   if (isLeft) {
 		   parent.setLeftSon(new WAVLExternalNode());
 	   } else {
 		   parent.setRightSon(new WAVLExternalNode());
 	   }
-
+	   //balances the tree if necessary
 	   int count = 0;
 	   if (toRebalance)
 		   count = rebalance(parent, 0);
@@ -451,8 +450,15 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   
    }
    
+   /**
+    * public int deleteUnaryNode(WAVLNode current, WAVLNode parent, boolean hasLeftLeaf, boolean toRebalance)
+    *
+    * deletes an unary node with key k from the binary tree
+    * updates the min\max node if necessary, assigns  WAVLExternalNode as a deletion method
+    * rebalances the tree only if it's not a part of a binary deletion 
+    */
    public int deleteUnaryNode(WAVLNode current, WAVLNode parent, boolean hasLeftLeaf, boolean toRebalance){
-	   //replacing current node with it's only son
+	   //check if the node is a min or max node
 	   boolean min_flag=false, max_flag=false;
 	   if(this.min_node.key == current.key){
 		   min_flag = true;
@@ -461,6 +467,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 		   max_flag = true;
 	   }
 	   
+	   //updates the node's parent to point at the node's son
 	   if (hasLeftLeaf){
 		   if (current.parent.getLeftSon().equals(current))
 			   parent.setLeftSon(current.getLeftSon());
@@ -476,6 +483,8 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 		   this.min_node = (min_flag ? current : this.min_node);
 	   }
 	   
+	   //rebalances the tree if it's unbalanced and the deletion is not
+	   //a part of a binary deletion.
 	   if (isValidTree())
 		   return 0;
 	   else {
@@ -485,44 +494,48 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 		   return count;
 	   }
    }
-   
-   public boolean checkTreeCorrectness() {
-	   if (root==null)
-		   return true;
-	   return nodeCorrectness(root);
-   }
-   
-   public boolean nodeCorrectness(WAVLNode node) {
-	   if (isLeaf(node))
-		   return true;
-	   else if (isLeftUnary(node))
-		   return (node.key > (((WAVLNode) node.getLeftSon()).key) && nodeCorrectness((WAVLNode) node.getLeftSon()));
-	   else if (isRightUnary(node))
-		   return (node.key < (((WAVLNode) node.getRightSon()).key) && nodeCorrectness((WAVLNode) node.getRightSon()));
-	   else {
-		   boolean verify = (node.getKey() > ((WAVLNode) node.getLeftSon()).key) && (node.getKey() < ((WAVLNode) node.getRightSon()).key);
-		   return verify && (nodeCorrectness((WAVLNode) node.getRightSon()) && nodeCorrectness((WAVLNode) node.getLeftSon()));
-	   }
-   }
 
+   /**
+    * public boolean isLeaf(WAVLNode current)
+    * 
+    * checks if the node doesn't point to any leaf
+    */
    public boolean isLeaf(WAVLNode current){
 	   return (current.getLeftSon() instanceof WAVLExternalNode
 			   && current.getRightSon() instanceof WAVLExternalNode);
    }
 
+   /**
+    * public boolean isLeftUnary(WAVLNode current)
+    * 
+    * checks if the node has a left leaf only
+    */
    public boolean isLeftUnary(WAVLNode current){
 	   return (!(current.getLeftSon() instanceof WAVLExternalNode)
 			   && current.getRightSon() instanceof WAVLExternalNode);
    }
 
+   /**
+    * public boolean isRightUnary(WAVLNode current)
+    * 
+    * checks if the node has a right leaf only
+    */
    public boolean isRightUnary(WAVLNode current){
 	   return ((current.getLeftSon() instanceof WAVLExternalNode)
 			   && !(current.getRightSon() instanceof WAVLExternalNode));
    }
 
+   /**
+    * public WAVLNode findSuccessor(WAVLNode current)
+    * 
+    * a method that searches a node's closest successor for replacement.
+    * compares the right and left sub-nodes using the recursiveSuccessor method.
+    */
    public WAVLNode findSuccessor(WAVLNode current){
+	   //search for the best successor of each side
 	   WAVLNode lefty = (WAVLNode) recursiveSuccessor((WAVLNode) current.getLeftSon(), current.key);
 	   WAVLNode righty = (WAVLNode) recursiveSuccessor((WAVLNode) current.getRightSon(), current.key);
+	   //compare the successors and returns the closest.
 	   if (Math.abs(current.key - lefty.key) < Math.abs(righty.key - current.key)) {
 		   return (WAVLNode) lefty;
 	   } else {
@@ -530,9 +543,18 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   }
    }
    
-   public WAVLNode recursiveSuccessor(WAVLNode current, int k){
+   /**
+    * public WAVLNode recursiveSuccessor(WAVLNode current, int k)
+    * 
+    * a recursive method that checks for every node which of
+    * it's sub-node is the closest to k. The function returns
+    * the closest successor to k.
+    */
+   public WAVLNode recursiveSuccessor(WAVLNode current, int k) {
+	   //if the node is a leaf - returns the leaf itself 
 	   if (isLeaf(current))
 		   return current;
+	   //if the node is an unary - returns the closest of each side
 	   if (isLeftUnary(current)){
 		   WAVLNode lefty = (WAVLNode) current.getLeftSon();
 		   if (Math.abs(k-lefty.key) < Math.abs(k-current.key))
@@ -543,6 +565,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 		   if (Math.abs(righty.key-k) < Math.abs(k-current.key))
 			   return righty;
 		   return current;
+	   //if the node is a binary - compares and returns the best returns of each side  
 	   } else {
 		   WAVLNode lefty = (WAVLNode) recursiveSuccessor((WAVLNode) current.getLeftSon(), k);
 		   WAVLNode righty = (WAVLNode) recursiveSuccessor((WAVLNode) current.getRightSon(), k);
@@ -674,6 +697,13 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   return size;
    }
 
+   /**
+    * public WAVLNode getRoot()
+    *
+    * Returns the root of the tree.
+    *
+    * precondition: none
+    */
    public WAVLNode getRoot() {
 		return root;
 	}
@@ -705,9 +735,6 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
 	   	public void setRank(int rank) {
 			this.rank = rank;
 		}
-	   	public abstract String toString();
-	
-
 	}
    
    

@@ -208,7 +208,6 @@ public class WAVLTreeTests {
         }
         System.out.println(counter);
         assertTrue(tree.isValidTree());
-        assert(tree.checkTreeCorrectness());
 	}
 
 	@Test
