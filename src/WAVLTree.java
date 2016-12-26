@@ -307,10 +307,7 @@ private void rotateRightLeftToRightRight(WAVLNode source, WAVLNode child) {
     * 
     * @return true if this is a valid WAVL tree..
     */
-   public boolean isValidTree(){
-	   return isValidRank(root);
-   }
-   
+  
    //used to make sure all our nodes are cool and follow WAVL standards:
    private boolean isValidRank(WAVLNode node){
 		boolean valid = node.isValidRankDiff();
