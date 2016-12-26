@@ -142,19 +142,7 @@ public class WAVLTree {
 		   if (node.getParent() != null){
 			   count +=rebalance(node.getParent(), 0);   
 		   }
-		} /*else if (!node.isValidRankDiff()) {
-			int ranksDiff = node.getRankDiff();
-			   //the size of the left is bigger then the right, the left is the place to balance:
-			if (ranksDiff == 2){
-				   count+=rebalanceLeftSide(node);
-			}
-			else if (ranksDiff == -2 ){
-				//The rank of the right subtree is bigger, adjust it:
-				count+=rebalanceRightSide(node);
-			}
-			if (!(node.parent == null))
-				count+= rebalance(node.getParent(), count);
-		}*/
+	   }
 	   return count;
 	   
    }
