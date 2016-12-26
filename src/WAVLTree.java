@@ -118,7 +118,7 @@ public class WAVLTree {
     */
    private int rebalance(WAVLNode node, int count){
 	   //if the rank hasn't changed, we can stop rebalancing:
-	   if (node.updateRank()){
+	   if (node.updateRank() || (!node.isValidRankDiff())){
 		   //if we need  to do rotations:
 		   if (!(node.isValidRankDiff())){
 			   //if this causes a problem, rotate:
@@ -142,7 +142,7 @@ public class WAVLTree {
 		   if (node.getParent() != null){
 			   count +=rebalance(node.getParent(), 0);   
 		   }
-		} else if (!node.isValidRankDiff()) {
+		} /*else if (!node.isValidRankDiff()) {
 			int ranksDiff = node.getRankDiff();
 			   //the size of the left is bigger then the right, the left is the place to balance:
 			if (ranksDiff == 2){
@@ -154,7 +154,7 @@ public class WAVLTree {
 			}
 			if (!(node.parent == null))
 				count+= rebalance(node.getParent(), count);
-		}
+		}*/
 	   return count;
 	   
    }
