@@ -50,7 +50,6 @@ public class WAVLTreeTests {
 		assertEquals("10:10 5:5 15:15 0:0 20:20 ",tree.toString());
 		assertEquals(2, tree.insert(-5, "-5"));
 		assertEquals("10:10 0:0 15:15 -5:-5 5:5 20:20 ",tree.toString());
-		assertEquals(tree.height(), tree.getRoot().getRank());
 		assertEquals(-1, tree.insert(-5, "-5"));
 		assertTrue(tree.isValidTree());
 	}
@@ -170,7 +169,6 @@ public class WAVLTreeTests {
 			int rand = ThreadLocalRandom.current().nextInt(-100000000, 100000000 + 1);
 			tree.insert(rand, Integer.toString(rand));
 		}
-		assertEquals(tree.height(), tree.getRoot().getRank());
 		assertTrue(tree.isValidTree());
 	}
 	
@@ -196,6 +194,7 @@ public class WAVLTreeTests {
         	for (int i=0; i<k; i++){
         		counter += tree.insert(list.get(i), Integer.toString(list.get(i))); //We don't have double cases here, different test
         		added.add(list.get(i));
+        		assertTrue(tree.isValidTree());
         	}
         	//deletions
         	k = ThreadLocalRandom.current().nextInt(0,Math.min(added.size(), maxActions)+ 1);
@@ -206,13 +205,13 @@ public class WAVLTreeTests {
         		/*counter += tree.delete(added.get(0));
         		added.remove(0);*/
         		counter += tree.delete(added.get(i));
+        		assertTrue(tree.isValidTree());
  	}
         	
         	
         }
         System.out.println(counter);
         assertTrue(tree.isValidTree());
-        assert(tree.checkTreeCorrectness());
 	}
 
 	@Test
