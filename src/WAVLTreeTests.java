@@ -203,14 +203,16 @@ public class WAVLTreeTests {
         	maxActions = maxActions -k;
         	Collections.shuffle(added);
         	for (int i=0; i<k; i++){
-        		counter += tree.delete(added.get(0));
-        		added.remove(0);
-        	}
+        		/*counter += tree.delete(added.get(0));
+        		added.remove(0);*/
+        		counter += tree.delete(added.get(i));
+ 	}
         	
         	
         }
         System.out.println(counter);
         assertTrue(tree.isValidTree());
+        assert(tree.checkTreeCorrectness());
 	}
 
 	@Test
@@ -228,11 +230,13 @@ public class WAVLTreeTests {
 	}
 	
 	private void printResults(int[][] data, int base){
-		String format = "Size: %s /t Max insertion %s /t average insertions %s /t max deletion $s /t average deletions %s";
+		String format = "Size: %s /t Max insertion %s /t average insertions %s /t max deletion %s /t average deletions %s";
 		for (int i=0; i<10; i++ ){
 			int numActions = (i+1)*base;
 			int[] results = data[i];
-			String toPrint = String.format(format,numActions, results[1], (double)results[0]/(double)numActions, results[3], (double)results[2]/(double)numActions);
+			double avgInsertions = (double)results[0]/(double)numActions;
+			double avgDeletions = (double)results[2]/(double)(numActions);
+			String toPrint = String.format(format,numActions, results[1], avgInsertions, results[3], avgDeletions);
 			System.out.println(toPrint);
 		}
 	}
